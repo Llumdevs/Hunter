@@ -2,22 +2,26 @@
 
 import { LocateFixed, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { MapLegend, Minimap, type MapPin } from "@/components/tonight/minimap";
 import { useMyPosition } from "@/components/tonight/use-my-position";
 import { VenueCard } from "@/components/tonight/venue-card";
 import { HunterLogo } from "@/components/logo";
 import { recommend } from "@/lib/tonight/recommend";
 import type { TonightData } from "@/lib/tonight/load";
+import { EMPTY_FILTERS, filterPlaces, type TonightFilters } from "@/lib/tonight/filters";
+import { MUSIC, VIBES, PRICES } from "@/lib/tonight/catalog";
 
 type Props = TonightData & { displayName: string };
 
 export function TonightView({ places, weights, preferences, displayName }: Props) {
   const { position, denied, locate } = useMyPosition();
-  const { forYou, alsoLike } = useMemo(() => recommend(places, preferences, weights), [places, preferences, weights]);
+  const [filters, setFilters] = useState<TonightFilters>(EMPTY_FILTERS);
+  const visiblePlaces = useMemo(() => filterPlaces(places, filters), [places, filters]);
+  const { forYou, alsoLike } = useMemo(() => recommend(visiblePlaces, preferences, weights), [visiblePlaces, preferences, weights]);
   const hasPreferences = forYou.some((r) => r.score.fit !== null) || alsoLike.length > 0;
   const forYouIds = new Set(forYou.map((r) => r.place.id));
-  const pins: MapPin[] = places.map((p) => ({
+  const pins: MapPin[] = visiblePlaces.map((p) => ({
     id: p.id, name: p.name, lat: p.lat, lng: p.lng,
     tone: !hasPreferences ? "other" : forYouIds.has(p.id) ? "match" : "discover",
   }));
@@ -35,9 +39,25 @@ export function TonightView({ places, weights, preferences, displayName }: Props
       </header>
 
       <h1 className="text-[28px] leading-[1.05] font-extrabold uppercase">Esta noche<br /><span className="text-muted">en Valencia</span></h1>
+      <details className="glass rounded-2xl p-4">
+        <summary className="cursor-pointer font-bold">Filtrar esta noche{Object.values(filters).some(Boolean) ? ` (${Object.values(filters).filter(Boolean).length})` : ""}</summary>
+        <div className="mt-4 flex flex-col gap-3">
+          {([{ key: "music", label: "Música esta noche", options: MUSIC }, { key: "vibe", label: "Ambiente esta noche", options: VIBES }, { key: "price", label: "Presupuesto esta noche", options: PRICES }] as const).map(({ key, label, options }) => (
+            <label key={key} className="flex flex-col gap-1 text-sm">
+              {label}
+              <select value={filters[key]} onChange={(event) => setFilters({ ...filters, [key]: event.target.value })} className="rounded-xl border border-white/20 bg-night-900 p-3">
+                <option value="">Todos</option>
+                {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </label>
+          ))}
+          <p className="text-xs text-muted">Solo para esta visita. Tus gustos guardados no cambian.</p>
+          <button type="button" onClick={() => setFilters(EMPTY_FILTERS)} className="text-sm text-orange-soft underline">Quitar filtros</button>
+        </div>
+      </details>
 
-      {places.length === 0 ? (
-        <p className="glass rounded-[var(--radius-card)] p-5 text-muted">Esta noche no hay locales abiertos en Hunter todavía.</p>
+      {visiblePlaces.length === 0 ? (
+        <p className="glass rounded-[var(--radius-card)] p-5 text-muted">{places.length === 0 ? "Esta noche no hay locales abiertos en Hunter todavía." : "No hay locales que coincidan con estos filtros. Prueba a quitar alguno."}</p>
       ) : (
         <>
           <div className="glass relative h-40 overflow-hidden rounded-[22px]">

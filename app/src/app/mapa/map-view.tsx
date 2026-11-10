@@ -2,15 +2,17 @@
 
 import { LocateFixed } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { MapLegend, Minimap, type MapPin } from "@/components/tonight/minimap";
 import { useMyPosition } from "@/components/tonight/use-my-position";
 import { labelFor, MUSIC } from "@/lib/tonight/catalog";
 import { distanceMeters, formatDistance } from "@/lib/tonight/format";
 import { matchReason, recommend, scorePlace } from "@/lib/tonight/recommend";
 import type { TonightData } from "@/lib/tonight/load";
+import { fitPercentage } from "@/lib/tonight/filters";
 
-export function MapView({ places, weights, preferences }: TonightData) {
+export function MapView({ places, weights, preferences, offersByPlace }: TonightData) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const { position, locate } = useMyPosition();
   const { all, forYouIds, hasPreferences } = useMemo(() => {
     const { forYou } = recommend(places, preferences, weights);
@@ -26,6 +28,7 @@ export function MapView({ places, weights, preferences }: TonightData) {
   const tone = (id: string): MapPin["tone"] => (!hasPreferences ? "other" : forYouIds.has(id) ? "match" : "discover");
   const pins: MapPin[] = places.map((p) => ({ id: p.id, name: p.name, lat: p.lat, lng: p.lng, tone: tone(p.id) }));
   const TONE_DOT = { match: "bg-lime", discover: "bg-orange", other: "bg-ink-muted" } as const;
+  const selected = all.find(({ place }) => place.id === selectedId);
 
   return (
     <section className="flex flex-col gap-4">
@@ -37,8 +40,21 @@ export function MapView({ places, weights, preferences }: TonightData) {
           </button>
         )}
       </header>
-      <div className="glass aspect-[4/5] overflow-hidden rounded-[var(--radius-card)]">
-        <Minimap pins={pins} me={position} width={360} height={450} />
+      <p className="text-sm text-muted">Toca un punto para descubrir el local.</p>
+      <div className="glass relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)]">
+        <Minimap pins={pins} me={position} width={360} height={450} onSelect={setSelectedId} selectedId={selectedId} />
+        {selected && (
+          <section aria-label="Local seleccionado" aria-live="polite" className="absolute inset-x-3 bottom-3 flex flex-col gap-3 rounded-3xl border border-white/20 bg-night-950 p-4 shadow-xl">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg font-bold">{selected.place.name}</h2>
+              <button type="button" aria-label="Cerrar local seleccionado" onClick={() => setSelectedId(null)} className="grid h-10 w-10 place-items-center rounded-full border border-white/20">×</button>
+            </div>
+            <p className="text-sm text-muted">{[selected.place.zone, position && formatDistance(distanceMeters(position, selected.place)), labelFor(MUSIC, selected.place.music), selected.place.price_level].filter(Boolean).join(" · ")}</p>
+            {selected.score.fit !== null && <p className="text-sm font-bold text-lime">{fitPercentage(selected.score.fit)}</p>}
+            {offersByPlace[selected.place.id] && <p className="text-sm text-orange-soft">{offersByPlace[selected.place.id]}</p>}
+            <Link href={`/local/${selected.place.id}`} className="rounded-full bg-lime p-3 text-center font-bold text-night-950">Ver el local</Link>
+          </section>
+        )}
       </div>
       <MapLegend />
       <p className="text-xs text-muted">Mapa esquemático: posiciones reales, sin calles.</p>

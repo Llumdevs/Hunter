@@ -5,6 +5,7 @@ import { labelFor, MUSIC } from "@/lib/tonight/catalog";
 import { crowdLabel, distanceMeters, formatDistance } from "@/lib/tonight/format";
 import { matchReason, type Score } from "@/lib/tonight/recommend";
 import type { TonightPlaceRow } from "@/lib/tonight/load";
+import { fitPercentage } from "@/lib/tonight/filters";
 
 type Props = { place: TonightPlaceRow; score: Score; me: { lat: number; lng: number } | null; matched: boolean };
 
@@ -19,7 +20,7 @@ export function VenueCard({ place, score, me, matched }: Props) {
     <Link href={`/local/${place.id}`} className="glass flex w-64 flex-none flex-col gap-2 rounded-[var(--radius-card)] p-2.5">
       <div className="relative">
         <PlacePhoto path={place.cover_path} alt={place.name} className="h-28 rounded-[20px]" />
-        {matched && <span className="absolute top-2 left-2 rounded-full bg-lime px-2.5 py-1 text-xs font-bold text-night-950">✓ Encaja</span>}
+        {score.fit !== null && <span className={`absolute top-2 left-2 rounded-full px-2.5 py-1 text-xs font-bold text-night-950 ${matched ? "bg-lime" : "bg-orange-soft"}`}>{fitPercentage(score.fit)}</span>}
         <span aria-hidden className="absolute top-2 right-2 grid h-8 w-8 place-items-center rounded-full bg-black/35"><Heart className="h-4 w-4" /></span>
       </div>
       <div className="flex items-center gap-2 px-1">
