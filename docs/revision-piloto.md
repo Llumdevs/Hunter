@@ -28,8 +28,8 @@ de invitado están en la corrección anterior.
 - La marca sigue siendo Hunter. «Rumbo» solo es la referencia visual recibida.
 - El piloto dice que guarda todo en el navegador; Hunter guarda datos en Supabase.
   No debe copiarse ese aviso porque en Hunter sería falso.
-- El mapa sigue siendo esquemático. No se han añadido un callejero real, teselas,
-  navegación por calles ni los barrios ilustrados de la referencia.
+- El mapa usa ahora Leaflet y OpenStreetMap, con zoom, marcadores y permiso de ubicación.
+  Hay un mapa sin calles de respaldo si falla el proveedor. No incluye rutas a pie ni navegación giro a giro.
 - Amigos es una primera versión de solicitudes y relaciones. No incluye chat,
   sincronización de contactos, notificaciones, ni ver los planes de otra persona.
 - La portada no muestra aún chips de filtros activos ni fecha; los filtros están
@@ -38,8 +38,10 @@ de invitado están en la corrección anterior.
   la ficha del local, pero todavía no influye en el orden de «También te puede gustar».
 - La procedencia se recoge en el perfil, no en el formulario inicial. El acceso por
   teléfono y la recuperación de cuentas de invitado no están implementados.
-- Los datos de ejemplo de `supabase/seed.sql` son solo locales. Aplicar migraciones
-  en Supabase alojado no carga locales ni ofertas de demostración.
+- Los datos de `supabase/seed.sql` siguen siendo solo locales. La interfaz ofrece además
+  cuatro locales y eventos de demostración si la base está vacía, con planes, check-in,
+  valoraciones y amigos simulados guardados solo en ese navegador, claramente separados
+  de las cuentas y puntos reales. Se reinician desde el menú lateral → Pruebas y datos demo.
 
 ## Activación
 
@@ -70,3 +72,9 @@ por sí solo la configuración de Auth del proyecto alojado.
 
 Las pruebas locales no demuestran que la migración o la configuración de Auth
 ya estén aplicadas en el proyecto alojado, ni que Vercel haya terminado de desplegar.
+
+## Navegación actual
+
+La barra inferior tiene cinco accesos: Esta noche, Mapa, Escanear QR, Mis planes y Amigos.
+Perfil, Salir, Gustos, Valoraciones, Privacidad y Pruebas están en el menú lateral de la
+cabecera. El diálogo permite Escape, cierre exterior y devuelve el foco al botón.

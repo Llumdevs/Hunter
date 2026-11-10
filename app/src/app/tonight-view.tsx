@@ -6,15 +6,15 @@ import { useMemo, useState } from "react";
 import { MapLegend, Minimap, type MapPin } from "@/components/tonight/minimap";
 import { useMyPosition } from "@/components/tonight/use-my-position";
 import { VenueCard } from "@/components/tonight/venue-card";
-import { HunterLogo } from "@/components/logo";
 import { recommend } from "@/lib/tonight/recommend";
 import type { TonightData } from "@/lib/tonight/load";
 import { EMPTY_FILTERS, filterPlaces, type TonightFilters } from "@/lib/tonight/filters";
 import { MUSIC, VIBES, PRICES } from "@/lib/tonight/catalog";
+import { DemoBanner, DemoEvents } from "@/components/demo/demo-panels";
 
 type Props = TonightData & { displayName: string };
 
-export function TonightView({ places, weights, preferences, displayName }: Props) {
+export function TonightView({ places, weights, preferences, displayName, demoMode, loadError }: Props) {
   const { position, denied, locate } = useMyPosition();
   const [filters, setFilters] = useState<TonightFilters>(EMPTY_FILTERS);
   const visiblePlaces = useMemo(() => filterPlaces(places, filters), [places, filters]);
@@ -30,8 +30,7 @@ export function TonightView({ places, weights, preferences, displayName }: Props
     <section className="flex flex-col gap-5">
       <header className="flex items-center justify-between">
         <div>
-          <HunterLogo className="h-6 text-fg" />
-          <p className="mt-1 text-sm text-muted">Hola, {displayName}</p>
+          <p className="text-sm text-muted">Hola, {displayName}</p>
         </div>
         <Link href="/perfil/gustos" aria-label="Editar mis gustos" className="glass grid h-11 w-11 place-items-center rounded-full">
           <SlidersHorizontal aria-hidden className="h-5 w-5" />
@@ -39,6 +38,8 @@ export function TonightView({ places, weights, preferences, displayName }: Props
       </header>
 
       <h1 className="text-[28px] leading-[1.05] font-extrabold uppercase">Esta noche<br /><span className="text-muted">en Valencia</span></h1>
+      {demoMode && <DemoBanner />}
+      {loadError && <p role="alert" className="text-sm text-rose">{loadError}</p>}
       <details className="glass rounded-2xl p-4">
         <summary className="cursor-pointer font-bold">Filtrar esta noche{Object.values(filters).some(Boolean) ? ` (${Object.values(filters).filter(Boolean).length})` : ""}</summary>
         <div className="mt-4 flex flex-col gap-3">
@@ -95,6 +96,7 @@ export function TonightView({ places, weights, preferences, displayName }: Props
           )}
         </>
       )}
+      {demoMode && <DemoEvents />}
     </section>
   );
 }

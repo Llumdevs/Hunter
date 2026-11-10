@@ -1,5 +1,28 @@
 # Hunter · app
 
+## Mapa y demostración
+
+- La barra inferior tiene cinco accesos. El menú lateral de la cabecera contiene
+  Perfil, Gustos, Valoraciones, Pruebas y datos demo, Privacidad y Salir.
+- El mapa usa Leaflet y el callejero de OpenStreetMap con atribución. No requiere
+  una clave. El navegador debe poder acceder a `tile.openstreetmap.org`.
+  Se pide permiso de ubicación al entrar en Mapa; si se deniega se puede seguir
+  explorando Valencia. La ubicación se usa en memoria para el punto azul y las
+  distancias; no se guarda por abrir el mapa.
+- Si no se cargan las imágenes del callejero, se ofrece un mapa sin calles y
+  sigue disponible la lista. Una ubicación fuera de Valencia no cambia el
+  encuadre inicial de todos los locales; hay un control para centrarse en ella.
+- Cuando `tonight_places` devuelve una lista vacía (sin error), aparecen cuatro
+  locales y eventos **Demo**. Los errores de API se muestran y no se disfrazan
+  de datos de prueba. Los datos reales tienen prioridad.
+- En **Pruebas y datos demo** se pueden abrir los cuatro eventos y reiniciar
+  los planes y amigos simulados. La demo permite apuntarse, simular check-in,
+  valorar y probar solicitudes sin escribir en Supabase ni otorgar puntos reales.
+  Se guarda en `localStorage` (`hunter-demo-v1`) de ese navegador, separada de
+  la cuenta real. Los amigos simulados están etiquetados y separados de los reales.
+- No hay migraciones nuevas para esta entrega. Los ejemplos de la interfaz no
+  se cargan en las tablas de producción ni usan el seed local.
+
 ## Funciones del piloto
 
 La migración `20261110170000_pilot_social.sql` añade procedencia privada,

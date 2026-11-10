@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { ErrorText, Field, INPUT_CLASS, PrimaryButton } from "@/components/ui";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { pilotResult, type Friend } from "@/lib/pilot/data";
+import { DemoFriends } from "@/components/demo/demo-panels";
 
 export function FriendsView({ friends, code }: { friends: Friend[]; code: string }) {
   const router = useRouter();
@@ -53,5 +54,6 @@ export function FriendsView({ friends, code }: { friends: Friend[]; code: string
         </div>
       </li>)}
     </ul>
+    <DemoFriends />
   </section>;
 }

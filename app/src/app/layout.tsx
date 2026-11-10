@@ -1,6 +1,8 @@
 import "@fontsource-variable/plus-jakarta-sans";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
+import { DemoProvider } from "@/components/demo/provider";
 
 export const metadata: Metadata = {
   title: "Hunter",
@@ -18,7 +20,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="es">
       <body className="font-sans antialiased">
-        <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-6">{children}</main>
+        <DemoProvider><main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-6">{children}</main></DemoProvider>
       </body>
     </html>
   );

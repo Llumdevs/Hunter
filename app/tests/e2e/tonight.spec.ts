@@ -66,7 +66,8 @@ test.describe("Esta noche", () => {
   test("borrar la cuenta vuelve a la portada sin sesión", async ({ page }) => {
     await signUpFromHome(page);
     await page.getByRole("link", { name: "Saltar por ahora" }).click();
-    await page.getByRole("navigation", { name: "Navegación principal" }).getByRole("link", { name: "Perfil" }).click();
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    await page.getByRole("navigation", { name: "Opciones de cuenta" }).getByRole("link", { name: "Mi perfil" }).click();
     await page.getByRole("button", { name: "Borrar mi cuenta" }).click();
     await page.getByRole("button", { name: "Sí, borrar mi cuenta" }).click();
     await expect(page.getByRole("link", { name: "Empezar" })).toBeVisible();

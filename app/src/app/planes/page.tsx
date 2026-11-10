@@ -1,9 +1,10 @@
 import { CheckCircle2, ScanLine, Ticket } from "lucide-react";
 import Link from "next/link";
 import { CancelSignupButton } from "./cancel-signup-button";
-import { TabBar } from "@/components/tab-bar";
+import { AppShell } from "@/components/app-shell";
 import { requireUserWithProfile } from "@/lib/auth/session";
 import { tonightDate } from "@/lib/tonight/night";
+import { DemoPlans } from "@/components/demo/demo-panels";
 
 export default async function PlansPage() {
   const { supabase } = await requireUserWithProfile("/planes");
@@ -15,9 +16,11 @@ export default async function PlansPage() {
   const checkinByPlace = new Map((checkins ?? []).map((c) => [c.place_id, c]));
 
   return (
-    <>
+    <AppShell>
       <section className="flex flex-col gap-5">
         <h1 className="text-[28px] leading-tight font-extrabold uppercase">Mis planes<br /><span className="text-muted">esta noche</span></h1>
+        <DemoPlans />
+        <h2 className="text-lg font-bold">Tus prelistas reales</h2>
         {(signups ?? []).length === 0 && (
           <div className="glass flex flex-col items-center gap-3 rounded-[var(--radius-card)] p-6 text-center">
             <Ticket aria-hidden className="h-8 w-8 text-orange" />
@@ -55,7 +58,7 @@ export default async function PlansPage() {
           );
         })}
       </section>
-      <TabBar />
-    </>
+
+    </AppShell>
   );
 }

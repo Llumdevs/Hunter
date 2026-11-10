@@ -10,6 +10,8 @@ import { loadTonight } from "@/lib/tonight/load";
 import { tonightDate } from "@/lib/tonight/night";
 import { ratingSummarySchema } from "@/lib/pilot/data";
 import Link from "next/link";
+import { DEMO_PLACES, DEMO_OFFERS } from "@/lib/demo/catalog";
+import { DemoBanner, DemoSignup } from "@/components/demo/demo-panels";
 
 const TILE = "rounded-[var(--radius-tile)] p-3 text-center text-day-ink";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -19,16 +21,17 @@ export default async function PlacePage({ params }: { params: Promise<{ placeId:
   if (!UUID.test(placeId)) return <Notice title="Local no encontrado" />;
   const { supabase, userId } = await optionalUser();
   const { places } = await loadTonight(supabase, userId);
-  const place = places.find((p) => p.id === placeId);
+  const demoPlace = DEMO_PLACES.find((p) => p.id === placeId);
+  const place = demoPlace ?? places.find((p) => p.id === placeId);
   if (!place) return <Notice title="Este local no abre esta noche">Vuelve a mirar mañana.</Notice>;
 
   const night = tonightDate();
   const [{ data: offers }, { data: signup }, { data: ratings }] = await Promise.all([
-    supabase.from("offers").select("id, title, description, includes_alcohol, days_of_week").eq("place_id", placeId).eq("is_active", true),
-    userId
+    demoPlace ? Promise.resolve({ data: [] }) : supabase.from("offers").select("id, title, description, includes_alcohol, days_of_week").eq("place_id", placeId).eq("is_active", true),
+    userId && !demoPlace
       ? supabase.from("signups").select("id").eq("place_id", placeId).eq("night_date", night).is("cancelled_at", null).maybeSingle()
       : Promise.resolve({ data: null }),
-    userId ? supabase.rpc("place_rating_summary", { p_place: placeId }) : Promise.resolve({ data: null }),
+    userId && !demoPlace ? supabase.rpc("place_rating_summary", { p_place: placeId }) : Promise.resolve({ data: null }),
   ]);
   const rating = ratingSummarySchema.safeParse(ratings);
   const tonightOffers = offersForNight(
@@ -44,6 +47,7 @@ export default async function PlacePage({ params }: { params: Promise<{ placeId:
         <div className="absolute top-6 left-5"><IconLink href="/" label="Volver a Esta noche"><ArrowLeft aria-hidden className="h-5 w-5" /></IconLink></div>
       </div>
       <div className="relative -mt-10 flex flex-col gap-4 rounded-t-[32px] bg-night-900 px-5 pt-7 pb-32">
+        {demoPlace && <DemoBanner />}
         <header className="text-center">
           <h1 className="text-[28px] font-extrabold">{place.name}</h1>
           <p className="flex items-center justify-center gap-1 text-sm text-muted">
@@ -73,7 +77,10 @@ export default async function PlacePage({ params }: { params: Promise<{ placeId:
             <p className="mt-1 text-xs text-muted">Se activa al hacer check-in en el local.</p>
           </article>
         ))}
-        <SignupButton placeId={placeId} signedUp={Boolean(signup)} loggedIn={Boolean(userId)} />
+        {demoPlace ? <>
+          <article className="rounded-3xl border border-dashed border-orange-soft/70 p-4"><h2 className="font-bold">{DEMO_OFFERS[placeId]}</h2><p className="text-xs text-muted">Oferta ficticia para probar el flujo. No canjeable en ningún local.</p></article>
+          <DemoSignup placeId={placeId} />
+        </> : <SignupButton placeId={placeId} signedUp={Boolean(signup)} loggedIn={Boolean(userId)} />}
       </div>
     </section>
   );

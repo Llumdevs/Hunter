@@ -13,6 +13,7 @@ let mockCity: string | null = null;
 let lastFeedback = "";
 let mockRating: number | null = null;
 let mockFriends: { id: string; name: string; status: string; incoming: boolean }[] = [];
+let emptyPlaces = false;
 const user = {
   id: "10000000-0000-0000-0000-000000000001",
   aud: "authenticated", role: "authenticated", email: "tester@example.com",
@@ -69,7 +70,7 @@ test.beforeAll(async () => {
     } else if (url.pathname === "/rest/v1/user_preferences") {
       res.end(JSON.stringify([{ music: ["house"], vibe: ["bailar"], price: [], age_bands: [] }]));
     } else if (url.pathname === "/rest/v1/rpc/tonight_places") {
-      res.end(JSON.stringify(testPlaces));
+      res.end(JSON.stringify(emptyPlaces ? [] : testPlaces));
     } else if (url.pathname === "/rest/v1/rpc/recommendation_settings") {
       res.end(JSON.stringify({ weight_music: 2, weight_vibe: 2, weight_age: 2, weight_price: 1, match_threshold: 0.6 }));
     } else if (url.pathname === "/rest/v1/offers") {
@@ -97,6 +98,8 @@ test.beforeAll(async () => {
     } else if (url.pathname === "/rest/v1/rpc/review_visit") {
       if (mockRating !== null) res.end('{"ok":false,"error":"already_reviewed"}');
       else { mockRating = body.p_rating; res.end('{"ok":true}'); }
+    } else if (url.pathname === "/auth/v1/logout") {
+      res.end("{}");
     } else {
       res.writeHead(404).end(JSON.stringify({ message: "Unexpected provider request" }));
     }
@@ -105,7 +108,11 @@ test.beforeAll(async () => {
 });
 
 test.afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
-test.beforeEach(() => { challenge = ""; callback = ""; existingProfile = false; deliveryError = false; guestDisabled = false; guestSignups = 0; mockCity = null; lastFeedback = ""; mockRating = null; mockFriends = []; });
+test.beforeEach(async ({ context }) => {
+  challenge = ""; callback = ""; existingProfile = false; deliveryError = false; guestDisabled = false; guestSignups = 0; mockCity = null; lastFeedback = ""; mockRating = null; mockFriends = []; emptyPlaces = false;
+  // Leaflet es real; solo se aíslan las imágenes externas del callejero.
+  await context.route("https://tile.openstreetmap.org/**", (route) => route.fulfill({ contentType: "image/png", body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64") }));
+});
 
 async function requestLink(page: Page, next = "/") {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
@@ -209,6 +216,8 @@ test("el mapa permite seleccionar un local, ver su oferta y cerrar la tarjeta", 
   await expect(card.getByRole("heading", { name: "Jazz de prueba" })).toBeVisible();
   await expect(card.getByText("Oferta de prueba")).toBeVisible();
   await expect(card.getByRole("link", { name: "Ver el local" })).toHaveAttribute("href", `/local/${testPlaces[1].id}`);
+  await card.getByRole("link", { name: "Ver el local" }).click({ trial: true });
+  await page.screenshot({ path: test.info().outputPath("mapa-movil.png") });
   await card.getByRole("button", { name: "Cerrar local seleccionado" }).click();
   await expect(card).not.toBeVisible();
 });
@@ -239,7 +248,7 @@ test("se puede enviar y cancelar una solicitud de amistad", async ({ page }) => 
   await page.getByRole("button", { name: "Enviar solicitud" }).click();
   await expect(page.getByRole("heading", { name: "Ana", exact: true })).toBeVisible();
   await expect(page.getByText("Solicitud enviada · pendiente")).toBeVisible();
-  await page.getByRole("button", { name: "Cancelar solicitud" }).click();
+  await page.getByRole("button", { name: "Cancelar solicitud", exact: true }).click();
   await expect(page.getByText(/Todavía no tienes amigos/)).toBeVisible();
 });
 
@@ -261,4 +270,93 @@ test("la valoración se guarda una sola vez y los puntos aparecen en el perfil",
   await expect(page.getByRole("button", { name: "Guardar valoración" })).toHaveCount(0);
   await page.goto("/perfil");
   await expect(page.locator("dt", { hasText: /^Puntos$/ }).locator("+ dd")).toHaveText("15");
+});
+
+test("la barra tiene cinco accesos y el menú lateral permite abrir perfil y cerrar con Escape", async ({ page }) => {
+  await enterPilot(page, "/mapa");
+  const navigation = page.getByRole("navigation", { name: "Navegación principal" });
+  await expect(navigation.getByRole("link")).toHaveCount(5);
+  await expect(navigation.getByRole("link", { name: "Perfil", exact: true })).toHaveCount(0);
+  const trigger = page.getByRole("button", { name: "Abrir menú" });
+  await trigger.click();
+  await expect(page.getByRole("dialog", { name: "Tu Hunter" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Salir", exact: true })).toBeVisible();
+  await page.screenshot({ path: test.info().outputPath("menu-lateral.png") });
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await page.getByRole("link", { name: "Mi perfil", exact: true }).click();
+  await expect(page).toHaveURL(/\/perfil$/);
+  expect(await page.evaluate(() => document.body.style.overflow)).not.toBe("hidden");
+});
+
+test("el mapa pide la ubicación al entrar y ofrece controles de zoom", async ({ page, context }) => {
+  await context.grantPermissions(["geolocation"]);
+  await context.setGeolocation({ latitude: 39.467, longitude: -0.373 });
+  await enterPilot(page, "/mapa");
+  await expect(page.getByRole("region", { name: "Mapa interactivo de locales" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Centrar en mi ubicación" })).toBeVisible();
+  await page.getByRole("button", { name: "Acercar", exact: true }).click();
+  await page.getByRole("button", { name: "Alejar", exact: true }).click();
+  await page.getByRole("button", { name: "Ver todos los locales" }).click();
+  await expect(page.getByRole("button", { name: "Jazz de prueba", exact: true })).toBeVisible();
+});
+
+test("sin permiso de ubicación se puede seguir seleccionando locales", async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, "geolocation", { value: { getCurrentPosition: (_success: unknown, failure: (error: { code: number }) => void) => failure({ code: 1 }) } }));
+  await enterPilot(page, "/mapa");
+  await expect(page.getByText(/No tenemos acceso a tu ubicación/)).toBeVisible();
+  await page.getByRole("button", { name: "Jazz de prueba", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Local seleccionado" })).toBeVisible();
+});
+
+test("con base vacía hay eventos demo, planes persistentes y check-in simulado", async ({ page }) => {
+  emptyPlaces = true;
+  await enterPilot(page, "/");
+  const events = page.getByRole("region", { name: "Eventos simulados" });
+  await expect(events.getByRole("link")).toHaveCount(4);
+  await events.getByRole("link", { name: /House en Ruzafa/ }).click();
+  await expect(page.getByRole("heading", { name: "Sala Neón · Demo" })).toBeVisible();
+  await page.getByRole("button", { name: "Apuntarme a este plan demo" }).click();
+  await page.getByRole("link", { name: /Plan demo guardado/ }).click();
+  const plans = page.getByRole("region", { name: "Planes demo" });
+  await expect(plans.getByRole("link", { name: "House en Ruzafa" })).toBeVisible();
+  await page.reload();
+  await plans.getByRole("button", { name: "Simular check-in" }).click();
+  await plans.getByLabel("Valorar House en Ruzafa").selectOption("4");
+  await expect(plans.getByText(/Tu valoración demo: 4/)).toBeVisible();
+  await page.goto("/demo");
+  await expect(page.getByText(/Puntos demo: 15/)).toBeVisible();
+  await page.getByRole("button", { name: "Reiniciar datos demo" }).click();
+  await expect(page.getByText(/Puntos demo: 0/)).toBeVisible();
+});
+
+test("los amigos simulados se pueden aceptar y restaurar sin cambiar amigos reales", async ({ page }) => {
+  await enterPilot(page, "/amigos");
+  const demos = page.getByRole("region", { name: "Amigos simulados" });
+  await demos.getByRole("button", { name: "Aceptar solicitud demo" }).click();
+  await expect(demos.getByText("Amistad simulada")).toHaveCount(2);
+  await page.reload();
+  await expect(demos.getByText("Amistad simulada")).toHaveCount(2);
+  expect(mockFriends).toEqual([]);
+  await page.goto("/demo");
+  await page.getByRole("button", { name: "Reiniciar datos demo" }).click();
+  await page.goto("/amigos");
+  await expect(demos.getByRole("button", { name: "Aceptar solicitud demo" })).toBeVisible();
+});
+
+test("cerrar sesión desde el menú vuelve a la portada", async ({ page }) => {
+  await enterPilot(page, "/perfil");
+  await page.getByRole("button", { name: "Abrir menú" }).click();
+  await page.getByRole("button", { name: "Salir", exact: true }).click();
+  await expect(page.getByRole("link", { name: "Empezar", exact: true })).toBeVisible();
+});
+
+test("si el callejero falla sigue disponible un mapa sin calles con selección", async ({ page, context }) => {
+  await context.route("https://tile.openstreetmap.org/**", (route) => route.fulfill({ status: 503, body: "Unavailable" }));
+  await enterPilot(page, "/mapa");
+  await page.getByRole("button", { name: "Ver mapa sin calles" }).click();
+  await page.getByRole("button", { name: "Jazz de prueba", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Local seleccionado" }).getByRole("heading", { name: "Jazz de prueba" })).toBeVisible();
 });

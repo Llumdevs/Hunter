@@ -1,7 +1,7 @@
 import { ChevronRight, ShieldCheck, SlidersHorizontal, Store, Star, Users } from "lucide-react";
 import Link from "next/link";
 import { AccountActions } from "./account-actions";
-import { TabBar } from "@/components/tab-bar";
+import { AppShell } from "@/components/app-shell";
 import { requireUserWithProfile } from "@/lib/auth/session";
 import { pilotProfileSchema } from "@/lib/pilot/data";
 import { PilotProfileDetails } from "./pilot-profile";
@@ -22,7 +22,7 @@ export default async function ProfilePage() {
     { href: "/privacidad", label: "Privacidad", Icon: ShieldCheck },
   ];
   return (
-    <>
+    <AppShell>
       <section className="flex flex-col gap-6">
         <header className="flex items-center gap-4">
           <span aria-hidden className="h-16 w-16 rounded-full border-2 border-white/40 bg-gradient-to-br from-orange-soft to-[#b05cff]" />
@@ -42,7 +42,7 @@ export default async function ProfilePage() {
         {pilot.success ? <PilotProfileDetails profile={pilot.data} /> : <p role="alert" className="text-sm text-muted">No hemos podido cargar el resumen del piloto. Inténtalo de nuevo más tarde.</p>}
         <AccountActions />
       </section>
-      <TabBar />
-    </>
+
+    </AppShell>
   );
 }

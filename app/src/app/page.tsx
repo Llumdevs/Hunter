@@ -2,7 +2,7 @@ import { ScanLine } from "lucide-react";
 import Link from "next/link";
 import { TonightView } from "./tonight-view";
 import { HunterLogo } from "@/components/logo";
-import { TabBar } from "@/components/tab-bar";
+import { AppShell } from "@/components/app-shell";
 import { LinkButton } from "@/components/ui";
 import { optionalUser } from "@/lib/auth/optional-session";
 import { loadTonight } from "@/lib/tonight/load";
@@ -17,10 +17,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   if (!userId || !displayName) return <Welcome />;
   const tonight = await loadTonight(supabase, userId);
   return (
-    <>
+    <AppShell>
       <TonightView {...tonight} displayName={displayName} />
-      <TabBar />
-    </>
+
+    </AppShell>
   );
 }
 
