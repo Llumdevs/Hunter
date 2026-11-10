@@ -31,7 +31,8 @@ export async function readOtpCode(email: string): Promise<string> {
 
 export async function logIn(page: Page, email: string) {
   await page.getByLabel("Tu email").fill(email);
-  await page.getByRole("button", { name: "Enviarme un código" }).click();
+  await page.getByRole("button", { name: "Enviarme un enlace" }).click();
+  await page.getByText("¿Has recibido un código en lugar de un enlace?").click();
   await page.getByLabel("Código").fill(await readOtpCode(email));
   await page.getByRole("button", { name: "Entrar" }).click();
 }

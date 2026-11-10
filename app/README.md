@@ -1,5 +1,40 @@
 # Hunter · app
 
+## Acceso del piloto alojado
+
+- **Probar sin correo** crea una sesión de invitado real de Supabase. Activar
+  **Authentication → Sign In / Providers → Anonymous Sign-ins** en el proyecto alojado.
+  Cada invitado tiene su propio usuario y queda sujeto a las mismas políticas RLS;
+  debe completar el perfil de mayor de edad. No recibe permisos del panel del local.
+  Si cierra sesión o borra el navegador, no puede recuperar esa cuenta.
+- El acceso por email utiliza el enlace predeterminado de Supabase. En
+  **Authentication → URL Configuration**, establecer Site URL en la URL pública
+  (actualmente `https://hunter-llumdevs.vercel.app`) y autorizar
+  `https://hunter-llumdevs.vercel.app/auth/callback**` en Redirect URLs.
+  El callback guarda la sesión y vuelve al destino o al alta del perfil.
+- `NEXT_PUBLIC_APP_ORIGIN` debe coincidir con el origen público del despliegue.
+  El enlace PKCE debe abrirse en el mismo navegador donde se pidió. Para probar
+  desde una PWA de iPhone sin cambiar de navegador, usar el acceso de invitado.
+- El servicio predeterminado de correo de Supabase tiene restricciones de destinatarios
+  y límites de envío. Corregir el callback no elimina esos límites. No hace falta
+  configurar SMTP para probar como invitado.
+- Las plantillas locales siguen enviando códigos: el formulario conserva una sección
+  opcional para introducirlos. Los enlaces caducados o inválidos muestran un error recuperable.
+- Aplicar las migraciones no carga los locales del seed local. Verificar los datos
+  alojados por separado antes de esperar locales en «Esta noche».
+
+Validación aislada del login, sin correos ni credenciales reales:
+
+```bash
+npx playwright install chromium
+npx playwright test --config playwright.auth.config.ts
+```
+
+En máquinas con Chromium del sistema se puede indicar
+`PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium`. Estos tests usan el SDK real,
+cookies y PKCE contra un servidor HTTP simulado; no verifican el envío real de correo
+ni la configuración del proyecto alojado.
+
 PWA (Next.js 16) + Supabase en local. Producto y decisiones: [`../brief-mvp-v2.md`](../brief-mvp-v2.md).
 
 ## Requisitos

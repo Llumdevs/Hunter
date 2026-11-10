@@ -10,6 +10,8 @@ describe("safeRedirectPath", () => {
     ["dominio externo", "https://evil.example"],
     ["ruta protocol-relative", "//evil.example/x"],
     ["barra invertida", "/\\evil.example"],
+    ["salto de línea que el navegador normaliza", "/\n/evil.example"],
+    ["tabulador que el navegador normaliza", "/\t/evil.example"],
     ["vacío", ""],
     ["ausente", null],
     ["javascript:", "javascript:alert(1)"],
