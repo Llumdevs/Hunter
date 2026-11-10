@@ -1,5 +1,18 @@
 # Hunter · app
 
+## Hunter para locales
+
+Entrada en `/locales` y gestión en `/panel`, dentro del mismo despliegue.
+La migración `20261110180000_venue_onboarding.sql` permite crear un local demo
+personal con ofertas y QR sin publicar el local ni conceder administración.
+
+El alta se solicita en `/panel/solicitar-alta` y se consulta o cancela desde el
+panel. Por decisión del usuario no se asigna ninguna cuenta administradora en
+pruebas; las solicitudes quedan pendientes. La revisión está preparada para
+cuando se configure una cuenta autorizada.
+
+Activación, permisos y pruebas: [`../docs/locales.md`](../docs/locales.md).
+
 ## Mapa y demostración
 
 - La barra inferior tiene cinco accesos. El menú lateral de la cabecera contiene

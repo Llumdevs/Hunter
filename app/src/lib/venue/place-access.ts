@@ -6,7 +6,7 @@ export async function loadStaffPlace(placeId: string, returnTo: string) {
   const { supabase } = await requireUserWithProfile(returnTo);
   const { data: place } = await supabase
     .from("places")
-    .select("id, name, zone, is_active, organizer_id, cities(timezone)")
+    .select("id, name, zone, is_active, is_demo, organizer_id, cities(timezone)")
     .eq("id", placeId)
     .maybeSingle();
   if (!place?.cities) return { supabase, place: null };

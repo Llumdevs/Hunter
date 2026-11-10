@@ -45,7 +45,7 @@ function Welcome() {
         <Link href="/escanear" className="flex items-center justify-center gap-2 text-sm font-semibold">
           <ScanLine aria-hidden className="h-4 w-4" />Ya estoy en el local: escanear el QR
         </Link>
-        <Link href="/panel" className="text-center text-sm text-muted underline">¿Tienes un local? Entra en tu panel</Link>
+        <Link href="/locales" className="text-center text-sm text-muted underline">¿Tienes un local? Entra en tu panel</Link>
       </div>
     </section>
   );

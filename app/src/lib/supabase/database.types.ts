@@ -227,14 +227,14 @@ isOneToOne: false
                   ]
                 },"places": {
                   Row: {
-                    "address": string,"base_age_band": string | null,"city_id": string,"created_at": string,"id": string,"is_active": boolean,"is_founder": boolean,"kind": string,"location": unknown,"name": string,"organizer_id": string,"price_level": string,"slug": string,"zone": string
+                    "address": string,"base_age_band": string | null,"city_id": string,"created_at": string,"demo_owner_id": string | null,"id": string,"is_active": boolean,"is_demo": boolean,"is_founder": boolean,"kind": string,"location": unknown,"name": string,"organizer_id": string,"price_level": string,"slug": string,"zone": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "address": string,"base_age_band"?: string | null,"city_id": string,"created_at"?: string,"id"?: string,"is_active"?: boolean,"is_founder"?: boolean,"kind": string,"location": unknown,"name": string,"organizer_id": string,"price_level"?: string,"slug": string,"zone": string
+                    "address": string,"base_age_band"?: string | null,"city_id": string,"created_at"?: string,"demo_owner_id"?: string | null,"id"?: string,"is_active"?: boolean,"is_demo"?: boolean,"is_founder"?: boolean,"kind": string,"location": unknown,"name": string,"organizer_id": string,"price_level"?: string,"slug": string,"zone": string
                   }
                   Update: {
-                    "address"?: string,"base_age_band"?: string | null,"city_id"?: string,"created_at"?: string,"id"?: string,"is_active"?: boolean,"is_founder"?: boolean,"kind"?: string,"location"?: unknown,"name"?: string,"organizer_id"?: string,"price_level"?: string,"slug"?: string,"zone"?: string
+                    "address"?: string,"base_age_band"?: string | null,"city_id"?: string,"created_at"?: string,"demo_owner_id"?: string | null,"id"?: string,"is_active"?: boolean,"is_demo"?: boolean,"is_founder"?: boolean,"kind"?: string,"location"?: unknown,"name"?: string,"organizer_id"?: string,"price_level"?: string,"slug"?: string,"zone"?: string
                   }
                   Relationships: [
                     {
@@ -325,6 +325,26 @@ isOneToOne: false
                   Relationships: [
 
                   ]
+                },"venue_applications": {
+                  Row: {
+                    "applicant_id": string,"created_at": string,"decision_note": string,"details": NonNullable<Json>,"id": string,"place_id": string | null,"reviewed_at": string | null,"reviewed_by": string | null,"status": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "applicant_id"?: string,"created_at"?: string,"decision_note"?: string,"details": NonNullable<Json>,"id"?: string,"place_id"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"status"?: string
+                  }
+                  Update: {
+                    "applicant_id"?: string,"created_at"?: string,"decision_note"?: string,"details"?: NonNullable<Json>,"id"?: string,"place_id"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"status"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "venue_applications_place_id_fkey"
+      columns: ["place_id"]
+isOneToOne: false
+      referencedRelation: "places"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -334,8 +354,14 @@ isOneToOne: false
             "cancel_signup":
 { Args: { "p_place_id": string }; Returns: Json
                            },
+"cancel_venue_application":
+{ Args: { "p_id": string }; Returns: Json
+                           },
 "check_in":
 { Args: { "p_lat"?: number,"p_lng"?: number,"p_place_id": string,"p_screen_code"?: string,"p_static_token"?: string }; Returns: Json
+                           },
+"create_my_demo_venue":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "delete_my_account":
 { Args: Record<PropertyKey, never>; Returns: undefined
@@ -374,6 +400,9 @@ isOneToOne: false
 "respond_friend":
 { Args: { "p_accept": boolean,"p_request": string }; Returns: Json
                            },
+"review_venue_application":
+{ Args: { "p_approve": boolean,"p_id": string,"p_note"?: string }; Returns: Json
+                           },
 "review_visit":
 { Args: { "p_checkin": string,"p_comment"?: string,"p_rating": number }; Returns: Json
                            },
@@ -383,6 +412,9 @@ isOneToOne: false
 "sign_up":
 { Args: { "p_place_id": string }; Returns: Json
                            },
+"submit_venue_application":
+{ Args: { "p_details": Json }; Returns: Json
+                           },
 "tonight_places":
 { Args: Record<PropertyKey, never>; Returns: {
               "age_band": string,"age_source": string,"closes_at": string,"cover_path": string,"id": string,"kind": string,"lat": number,"lng": number,"music": string,"name": string,"opens_at": string,"price_level": string,"signups_any": boolean,"signups_visible": number,"vibe": string,"zone": string
@@ -390,6 +422,9 @@ isOneToOne: false
                            },
 "update_my_city":
 { Args: { "p_city": string }; Returns: Json
+                           },
+"venue_management_context":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            }
           }
           Enums: {

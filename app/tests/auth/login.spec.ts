@@ -14,6 +14,13 @@ let lastFeedback = "";
 let mockRating: number | null = null;
 let mockFriends: { id: string; name: string; status: string; incoming: boolean }[] = [];
 let emptyPlaces = false;
+let demoVenueCreated = false;
+let venueAdmin = false;
+const demoVenueId = "70000000-0000-4000-8000-000000000001";
+const demoOrganizerId = "70000000-0000-4000-8000-000000000002";
+let demoVenueOffers = [{ id: "70000000-0000-4000-8000-000000000003", place_id: demoVenueId, title: "Tapa de bienvenida · Demo", description: "Oferta de ejemplo", includes_alcohol: false, days_of_week: [1, 2, 3, 4, 5, 6, 7], valid_until_time: null as string | null, is_active: true }];
+type MockApplication = { id: string; applicant_id: string; details: Record<string, unknown>; status: string; created_at: string; decision_note: string; place_id: string | null };
+let venueApplications: MockApplication[] = [];
 const user = {
   id: "10000000-0000-0000-0000-000000000001",
   aud: "authenticated", role: "authenticated", email: "tester@example.com",
@@ -74,9 +81,43 @@ test.beforeAll(async () => {
     } else if (url.pathname === "/rest/v1/rpc/recommendation_settings") {
       res.end(JSON.stringify({ weight_music: 2, weight_vibe: 2, weight_age: 2, weight_price: 1, match_threshold: 0.6 }));
     } else if (url.pathname === "/rest/v1/offers") {
-      res.end(JSON.stringify([{ place_id: testPlaces[1].id, title: "Oferta de prueba", days_of_week: [1, 2, 3, 4, 5, 6, 7] }]));
+      if (req.method === "POST") {
+        demoVenueOffers.push({ ...body, id: "70000000-0000-4000-8000-000000000004", is_active: true });
+        res.writeHead(201).end();
+      } else if (req.method === "PATCH") {
+        demoVenueOffers = demoVenueOffers.map((offer) => `eq.${offer.id}` === url.searchParams.get("id") ? { ...offer, ...body } : offer);
+        res.writeHead(204).end();
+      } else if (url.searchParams.get("place_id") === `eq.${demoVenueId}`) {
+        res.end(JSON.stringify(demoVenueOffers.filter((offer) => !url.searchParams.has("id") || `eq.${offer.id}` === url.searchParams.get("id"))));
+      } else res.end(JSON.stringify([{ id: "test-offer", place_id: testPlaces[1].id, title: "Oferta de prueba", days_of_week: [1, 2, 3, 4, 5, 6, 7] }]));
     } else if (url.pathname === "/rest/v1/organizer_members") {
+      res.end(JSON.stringify(demoVenueCreated ? [{ organizer_id: demoOrganizerId }] : []));
+    } else if (url.pathname === "/rest/v1/places") {
+      res.end(JSON.stringify(demoVenueCreated ? [{ id: demoVenueId, name: "Mi local de prueba · Demo", zone: "Ruzafa", organizer_id: demoOrganizerId, is_active: false, is_demo: true, cities: { timezone: "Europe/Madrid" } }] : []));
+    } else if (url.pathname === "/rest/v1/venue_applications") {
+      res.end(JSON.stringify(venueApplications.filter((application) => !url.searchParams.has("status") || `eq.${application.status}` === url.searchParams.get("status"))));
+    } else if (url.pathname === "/rest/v1/rpc/venue_management_context") {
+      res.end(JSON.stringify({ is_admin: venueAdmin, approvals_enabled: venueAdmin, demo_place_id: demoVenueCreated ? demoVenueId : null }));
+    } else if (url.pathname === "/rest/v1/rpc/create_my_demo_venue") {
+      demoVenueCreated = true;
+      res.end(JSON.stringify({ ok: true, place_id: demoVenueId }));
+    } else if (url.pathname === "/rest/v1/rpc/place_nightly_stats") {
       res.end("[]");
+    } else if (url.pathname === "/rest/v1/rpc/place_qr_credentials") {
+      res.end(JSON.stringify([{ static_token: "test-only-demo-qr", screen_secret: "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff" }]));
+    } else if (url.pathname === "/rest/v1/rpc/submit_venue_application") {
+      const id = "80000000-0000-4000-8000-000000000001";
+      venueApplications.push({ id, applicant_id: user.id, details: body.p_details, status: "pending", created_at: new Date().toISOString(), decision_note: "", place_id: null });
+      res.end(JSON.stringify({ ok: true, application_id: id }));
+    } else if (url.pathname === "/rest/v1/rpc/cancel_venue_application") {
+      venueApplications = venueApplications.map((application) => application.id === body.p_id ? { ...application, status: "cancelled" } : application);
+      res.end('{"ok":true}');
+    } else if (url.pathname === "/rest/v1/rpc/review_venue_application") {
+      if (!venueAdmin) res.end('{"ok":false,"error":"forbidden"}');
+      else {
+        venueApplications = venueApplications.map((application) => application.id === body.p_id ? { ...application, status: body.p_approve ? "approved" : "rejected", decision_note: body.p_note, place_id: body.p_approve ? "90000000-0000-4000-8000-000000000001" : null } : application);
+        res.end('{"ok":true}');
+      }
     } else if (url.pathname === "/rest/v1/rpc/my_pilot_profile") {
       res.end(JSON.stringify({ name: "Prueba", home_city: mockCity, age: 25, contact: user.email, friend_code: "0123456789abcdef", signups: 2, checkins: 1, reviews: mockRating === null ? 0 : 1, points: mockRating === null ? 10 : 15 }));
     } else if (url.pathname === "/rest/v1/rpc/update_my_city") {
@@ -110,6 +151,8 @@ test.beforeAll(async () => {
 test.afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
 test.beforeEach(async ({ context }) => {
   challenge = ""; callback = ""; existingProfile = false; deliveryError = false; guestDisabled = false; guestSignups = 0; mockCity = null; lastFeedback = ""; mockRating = null; mockFriends = []; emptyPlaces = false;
+  demoVenueCreated = false; venueAdmin = false; venueApplications = [];
+  demoVenueOffers = [{ id: "70000000-0000-4000-8000-000000000003", place_id: demoVenueId, title: "Tapa de bienvenida · Demo", description: "Oferta de ejemplo", includes_alcohol: false, days_of_week: [1, 2, 3, 4, 5, 6, 7], valid_until_time: null, is_active: true }];
   // Leaflet es real; solo se aíslan las imágenes externas del callejero.
   await context.route("https://tile.openstreetmap.org/**", (route) => route.fulfill({ contentType: "image/png", body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64") }));
 });
@@ -379,4 +422,72 @@ test("tocar un punto del minimapa de inicio abre Mapa y no la ficha del local", 
   await preview.locator("circle").first().click();
   await expect(page).toHaveURL("http://127.0.0.1:3100/mapa");
   await expect(page.getByRole("region", { name: "Mapa interactivo de locales" })).toBeVisible();
+});
+
+test("los locales tienen una entrada propia con acceso al panel y al alta", async ({ page }) => {
+  await page.goto("/locales");
+  await expect(page.getByRole("heading", { name: "Tu local, en los planes de esta noche." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Entrar en mi panel", exact: true })).toHaveAttribute("href", "/panel");
+  await expect(page.getByRole("link", { name: "Solicitar el alta de mi local" })).toHaveAttribute("href", "/panel/solicitar-alta");
+});
+
+test("un usuario crea su local demo, edita ofertas y tiene sus QR sin ser admin", async ({ page }) => {
+  await enterPilot(page, "/panel");
+  await expect(page.getByRole("link", { name: "Revisar solicitudes de locales" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Crear mi local demo" }).click();
+  await expect(page).toHaveURL(`http://127.0.0.1:3100/panel/${demoVenueId}`);
+  await expect(page.getByText("Local demo personal.", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("tonight-Check-ins")).toHaveText("0");
+  await page.screenshot({ path: test.info().outputPath("panel-demo.png"), fullPage: true });
+  const toggle = page.getByRole("switch", { name: "Oferta activa: Tapa de bienvenida · Demo" });
+  await toggle.click();
+  await expect(toggle).not.toBeChecked();
+  await page.getByRole("link", { name: "Tapa de bienvenida · Demo", exact: true }).click();
+  await page.getByLabel("Título", { exact: true }).fill("Oferta editada de prueba");
+  await page.getByRole("button", { name: "Guardar oferta", exact: true }).click();
+  await expect(page.getByRole("link", { name: "Oferta editada de prueba", exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Mi QR para imprimir" }).click();
+  await expect(page.getByLabel("QR fijo del local")).toHaveAttribute("data-qr-url", new RegExp(`/c/${demoVenueId}`));
+  await expect(page.getByText("Local demo personal.", { exact: true })).toBeVisible();
+});
+
+test("la solicitud de alta queda pendiente y el propietario puede cancelarla", async ({ page }) => {
+  const browserErrors: string[] = [];
+  page.on("pageerror", (error) => browserErrors.push(error.message));
+  await enterPilot(page, "/panel/solicitar-alta");
+  await page.getByLabel("Nombre del local").fill("Mi bar de prueba");
+  await page.getByLabel("Barrio / zona").fill("Ruzafa");
+  await page.getByLabel("Dirección en Valencia").fill("Calle de prueba 12");
+  await page.getByLabel("Email o teléfono de contacto").fill("local@example.com");
+  await page.getByLabel("Latitud", { exact: true }).fill("39.46");
+  await page.getByLabel("Longitud", { exact: true }).fill("-0.37");
+  await page.getByRole("checkbox", { name: /Confirmo que estoy autorizado/ }).check();
+  await page.getByRole("button", { name: "Enviar solicitud de alta", exact: true }).click();
+  await expect(page).toHaveURL(/\/panel\?alta=enviada$/);
+  await expect(page.getByRole("heading", { name: "Mi bar de prueba", exact: true })).toBeVisible();
+  await expect(page.getByText("Pendiente de revisión", { exact: true })).toBeVisible();
+  expect(venueApplications[0].status).toBe("pending");
+  await page.getByRole("button", { name: "Cancelar solicitud de alta" }).click();
+  await expect(page.getByText("Cancelada", { exact: true })).toBeVisible();
+  expect(browserErrors).toEqual([]);
+});
+
+test("una cuenta de prueba no puede entrar en la revisión de altas", async ({ page }) => {
+  await enterPilot(page, "/panel/admin");
+  await expect(page.getByRole("heading", { name: "Acceso reservado" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Confirmar decisión" })).toHaveCount(0);
+});
+
+test("el flujo preparado de revisión exige confirmar antes de publicar", async ({ page }) => {
+  // Rol simulado solo en este test; la migración no asigna ningún administrador real.
+  venueAdmin = true;
+  venueApplications = [{ id: "80000000-0000-4000-8000-000000000001", applicant_id: user.id,
+    details: { name: "Bar pendiente", zone: "Ruzafa", address: "Calle de prueba 12", contact: "local@example.com", kind: "bar", price: "€€", lat: 39.46, lng: -0.37, days: [1, 5, 6], opens_at: "20:00", closes_at: "03:00" }, status: "pending", created_at: new Date().toISOString(), decision_note: "", place_id: null }];
+  await enterPilot(page, "/panel/admin");
+  await page.getByRole("button", { name: "Confirmar decisión" }).click();
+  await expect(page.getByText("Confirma que has revisado el local antes de publicarlo.", { exact: true })).toBeVisible();
+  expect(venueApplications[0].status).toBe("pending");
+  await page.getByRole("checkbox", { name: /He revisado la información/ }).check();
+  await page.getByRole("button", { name: "Confirmar decisión" }).click();
+  await expect(page.getByText("No hay solicitudes pendientes.")).toBeVisible();
 });

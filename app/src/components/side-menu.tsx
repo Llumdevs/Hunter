@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X, User, SlidersHorizontal, Star, FlaskConical, ShieldCheck, LogOut } from "lucide-react";
+import { Menu, X, User, SlidersHorizontal, Star, FlaskConical, ShieldCheck, LogOut, Store } from "lucide-react";
 import { HunterLogo } from "@/components/logo";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/perfil/gustos", label: "Mis gustos", Icon: SlidersHorizontal },
   { href: "/valoraciones", label: "Mis valoraciones", Icon: Star },
   { href: "/demo", label: "Pruebas y datos demo", Icon: FlaskConical },
+  { href: "/panel", label: "Panel de locales", Icon: Store },
   { href: "/privacidad", label: "Privacidad", Icon: ShieldCheck },
 ];
 

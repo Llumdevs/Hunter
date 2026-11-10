@@ -5,6 +5,7 @@ import { BackLink } from "@/components/venue/day";
 import { publicEnv } from "@/lib/env";
 import { checkInPath } from "@/lib/checkin/link";
 import { loadQrCredentials } from "@/lib/venue/qr-credentials";
+import { DemoVenueNotice } from "@/components/venue/demo-notice";
 
 export default async function StaticQrPage({ params }: { params: Promise<{ placeId: string }> }) {
   const { placeId } = await params;
@@ -21,6 +22,7 @@ export default async function StaticQrPage({ params }: { params: Promise<{ place
       <div className="self-start print:hidden"><BackLink href={`/panel/${placeId}`}>{place.name}</BackLink></div>
       <p className="text-sm font-bold tracking-widest text-orange uppercase">Hunter</p>
       <h1 className="text-3xl font-extrabold">{place.name}</h1>
+      {place.is_demo && <DemoVenueNotice />}
       <p className="text-muted print:text-black">Escanea para hacer check-in y desbloquear la oferta</p>
       <div className="w-full max-w-xs rounded-[var(--radius-card)] bg-white p-4 shadow-[0_10px_30px_-18px_rgb(60_40_30/0.35)]" aria-label="QR fijo del local" data-qr-url={url}
         dangerouslySetInnerHTML={{ __html: svg }} />

@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
 import { Minimap, type MapPin } from "./minimap";
 
-type Props = { pins: MapPin[]; me: { lat: number; lng: number } | null; selectedId: string | null; onSelect: (id: string) => void };
+type Props = { pins: MapPin[]; me: { lat: number; lng: number } | null; selectedId: string | null; onSelect: (id: string) => void; onPickPosition?: (lat: number, lng: number) => void };
 const COLORS = { match: "#c6f432", discover: "#ff925b", other: "#b1abc5" };
 
-export function StreetMap({ pins, me, selectedId, onSelect }: Props) {
+export function StreetMap({ pins, me, selectedId, onSelect, onPickPosition }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<Leaflet.Map | null>(null);
   const library = useRef<typeof Leaflet | null>(null);
@@ -24,7 +24,9 @@ export function StreetMap({ pins, me, selectedId, onSelect }: Props) {
     import("leaflet").then((L) => {
       if (canceled || !container.current) return;
       library.current = L;
-      const instance = L.map(container.current, { zoomControl: false, scrollWheelZoom: true }).setView([39.47, -0.376], 13);
+      // Leaflet 1.9 deja un temporizador de zoom vivo al desmontarse durante una
+      // navegación. El zoom inmediato evita que intente usar un mapa ya eliminado.
+      const instance = L.map(container.current, { zoomControl: false, scrollWheelZoom: true, zoomAnimation: false }).setView([39.47, -0.376], 13);
       L.control.zoom({ zoomInTitle: "Acercar", zoomOutTitle: "Alejar" }).addTo(instance);
       map.current = instance;
       markers.current = L.layerGroup().addTo(instance);
@@ -35,7 +37,7 @@ export function StreetMap({ pins, me, selectedId, onSelect }: Props) {
         maxZoom: 19,
       }).on("tileload", () => { loaded++; setTilesFailed(false); })
         .on("tileerror", () => { if (++failures >= 3 && loaded === 0) setTilesFailed(true); }).addTo(instance);
-      observer = new ResizeObserver(() => instance.invalidateSize());
+      observer = new ResizeObserver(() => { if (!canceled && map.current === instance) instance.invalidateSize({ animate: false }); });
       observer.observe(container.current);
       setReady(true);
     }).catch(() => { if (!canceled) setTilesFailed(true); });
@@ -43,6 +45,14 @@ export function StreetMap({ pins, me, selectedId, onSelect }: Props) {
       canceled = true; observer?.disconnect(); map.current?.remove(); map.current = null; fitted.current = "";
     };
   }, [schematic]);
+
+  useEffect(() => {
+    const instance = map.current;
+    if (!ready || !instance || !onPickPosition) return;
+    const pick = (event: Leaflet.LeafletMouseEvent) => onPickPosition(event.latlng.lat, event.latlng.lng);
+    instance.on("click", pick);
+    return () => { instance.off("click", pick); };
+  }, [ready, onPickPosition]);
 
   useEffect(() => {
     const instance = map.current;
@@ -68,7 +78,7 @@ export function StreetMap({ pins, me, selectedId, onSelect }: Props) {
     // Encajar solo los locales: una ubicación lejana no debe comprimirlos en un punto.
     const key = JSON.stringify(pins.map((pin) => [pin.id, pin.lat, pin.lng]));
     if (key !== fitted.current && pins.length > 0) {
-      instance.fitBounds(L.latLngBounds(pins.map((pin) => [pin.lat, pin.lng] as [number, number])), { padding: [35, 35], maxZoom: 15 });
+      instance.fitBounds(L.latLngBounds(pins.map((pin) => [pin.lat, pin.lng] as [number, number])), { padding: [35, 35], maxZoom: 15, animate: false });
       fitted.current = key;
     }
   }, [ready, pins, selectedId, me, onSelect, schematic]);

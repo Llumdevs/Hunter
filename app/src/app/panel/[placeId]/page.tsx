@@ -7,6 +7,7 @@ import { BackLink, DayCard, SectionTitle } from "@/components/venue/day";
 import { loadStaffPlace } from "@/lib/venue/place-access";
 import { currentNight, lastNights, summarizeNights } from "@/lib/venue/stats";
 import { WEEKDAY_LABELS } from "@/lib/venue/weekdays";
+import { DemoVenueNotice } from "@/components/venue/demo-notice";
 
 const NIGHTS_SHOWN = 7;
 const percent = (rate: number | null) => (rate === null ? "—" : `${Math.round(rate * 100)} %`);
@@ -39,6 +40,7 @@ export default async function PlacePanelPage({ params }: { params: Promise<{ pla
         <p className="text-sm text-muted">Tu local</p>
         <h1 className="text-3xl font-extrabold">{place.name}</h1>
       </header>
+      {place.is_demo && <DemoVenueNotice />}
 
       <section aria-labelledby="tonight" className="flex flex-col gap-2">
         <h2 id="tonight" className="text-lg font-bold">Esta noche</h2>

@@ -2,6 +2,7 @@ import { PhotoManager } from "./photo-manager";
 import { Notice } from "@/components/ui";
 import { BackLink } from "@/components/venue/day";
 import { loadStaffPlace } from "@/lib/venue/place-access";
+import { DemoVenueNotice } from "@/components/venue/demo-notice";
 
 export default async function PlacePhotosPage({ params }: { params: Promise<{ placeId: string }> }) {
   const { placeId } = await params;
@@ -20,6 +21,7 @@ export default async function PlacePhotosPage({ params }: { params: Promise<{ pl
         <h1 className="text-3xl font-extrabold">Fotos del local</h1>
         <p className="text-sm text-muted">La primera es la portada. JPG, PNG o WebP de hasta 5 MB.</p>
       </header>
+      {place.is_demo && <DemoVenueNotice />}
       <PhotoManager placeId={placeId} placeName={place.name} photos={photos ?? []} />
     </section>
   );
