@@ -360,3 +360,23 @@ test("si el callejero falla sigue disponible un mapa sin calles con selección",
   await page.getByRole("button", { name: "Jazz de prueba", exact: true }).click();
   await expect(page.getByRole("region", { name: "Local seleccionado" }).getByRole("heading", { name: "Jazz de prueba" })).toBeVisible();
 });
+
+test("las tarjetas siguen desplazándose sin mostrar la barra horizontal", async ({ page }) => {
+  emptyPlaces = true;
+  await enterPilot(page, "/");
+  const carousel = page.getByRole("group", { name: "Locales de También te puede gustar" });
+  expect(await carousel.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+  expect(await carousel.evaluate((element) => getComputedStyle(element).scrollbarWidth)).toBe("none");
+  await carousel.hover();
+  await page.mouse.wheel(400, 0);
+  await expect.poll(() => carousel.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+});
+
+test("tocar un punto del minimapa de inicio abre Mapa y no la ficha del local", async ({ page }) => {
+  await enterPilot(page, "/");
+  const preview = page.getByRole("link", { name: "Abrir mapa de esta noche" });
+  await expect(preview.locator("a")).toHaveCount(0);
+  await preview.locator("circle").first().click();
+  await expect(page).toHaveURL("http://127.0.0.1:3100/mapa");
+  await expect(page.getByRole("region", { name: "Mapa interactivo de locales" })).toBeVisible();
+});

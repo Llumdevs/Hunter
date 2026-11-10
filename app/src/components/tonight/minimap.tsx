@@ -2,13 +2,13 @@ import Link from "next/link";
 import { projectPoints } from "@/lib/tonight/project";
 
 export type MapPin = { id: string; name: string; lat: number; lng: number; tone: "match" | "discover" | "other" };
-type Props = { pins: MapPin[]; me: { lat: number; lng: number } | null; width: number; height: number; onSelect?: (id: string) => void; selectedId?: string | null };
+type Props = { pins: MapPin[]; me: { lat: number; lng: number } | null; width: number; height: number; onSelect?: (id: string) => void; selectedId?: string | null; interactive?: boolean };
 
 const TONE = { match: "fill-lime", discover: "fill-orange", other: "fill-ink-muted" } as const;
 const PADDING = 22;
 
 // Mapa esquemático (posiciones reales, sin calles) hasta conectar un proveedor de teselas.
-export function Minimap({ pins, me, width, height, onSelect, selectedId }: Props) {
+export function Minimap({ pins, me, width, height, onSelect, selectedId, interactive = true }: Props) {
   const points = projectPoints([...pins, ...(me ? [me] : [])], { width, height, padding: PADDING });
   const mePoint = me ? points[points.length - 1] : null;
   return (
@@ -24,7 +24,7 @@ export function Minimap({ pins, me, width, height, onSelect, selectedId }: Props
           <circle cx={points[i].x} cy={points[i].y} r="13" className={`${TONE[pin.tone]} opacity-20`} />
           <circle cx={points[i].x} cy={points[i].y} r={selectedId === pin.id ? "10" : "7"} className={`${TONE[pin.tone]} ${selectedId === pin.id ? "stroke-white" : "stroke-night-900"}`} strokeWidth="3" />
         </>;
-        return onSelect ? (
+        return !interactive ? <g key={pin.id}>{circles}</g> : onSelect ? (
           <g key={pin.id} role="button" tabIndex={0} aria-label={pin.name} aria-pressed={selectedId === pin.id}
             className="cursor-pointer outline-orange" onClick={() => onSelect(pin.id)}
             onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(pin.id); } }}>

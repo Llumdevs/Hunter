@@ -62,8 +62,10 @@ export function TonightView({ places, weights, preferences, displayName, demoMod
       ) : (
         <>
           <div className="glass relative h-40 overflow-hidden rounded-[22px]">
-            <Minimap pins={pins} me={position} width={360} height={160} />
-            <Link href="/mapa" className="absolute right-2.5 bottom-2.5 rounded-full border border-white/15 bg-night-950/75 px-3 py-1.5 text-xs font-bold">Ver mapa</Link>
+            <Link href="/mapa" aria-label="Abrir mapa de esta noche" className="block h-full w-full focus-visible:outline-2 focus-visible:outline-orange">
+              <Minimap pins={pins} me={position} width={360} height={160} interactive={false} />
+              <span className="absolute right-2.5 bottom-2.5 rounded-full border border-white/15 bg-night-950/75 px-3 py-1.5 text-xs font-bold">Ver mapa</span>
+            </Link>
             {!position && (
               <button type="button" onClick={locate}
                 className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full border border-white/15 bg-night-950/75 px-3 py-1.5 text-xs font-bold">
@@ -106,7 +108,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <section aria-labelledby={id} className="flex flex-col gap-3">
       <h2 id={id} className="text-lg font-bold">{title}</h2>
-      <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{children}</div>
+      <div role="group" aria-label={`Locales de ${title}`} tabIndex={0} className="horizontal-carousel -mx-5 flex gap-3 overflow-x-auto px-5 pb-1">{children}</div>
     </section>
   );
 }

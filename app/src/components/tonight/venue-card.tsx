@@ -17,7 +17,7 @@ function placeMeta(place: TonightPlaceRow, me: Props["me"]) {
 export function VenueCard({ place, score, me, matched }: Props) {
   const crowd = crowdLabel(place.signups_visible, place.signups_any);
   return (
-    <Link href={`/local/${place.id}`} className="glass flex w-64 flex-none flex-col gap-2 rounded-[var(--radius-card)] p-2.5">
+    <Link href={`/local/${place.id}`} className="glass flex w-64 flex-none snap-start flex-col gap-2 rounded-[var(--radius-card)] p-2.5">
       <div className="relative">
         <PlacePhoto path={place.cover_path} alt={place.name} className="h-28 rounded-[20px]" />
         {score.fit !== null && <span className={`absolute top-2 left-2 rounded-full px-2.5 py-1 text-xs font-bold text-night-950 ${matched ? "bg-lime" : "bg-orange-soft"}`}>{fitPercentage(score.fit)}</span>}

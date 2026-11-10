@@ -110,3 +110,16 @@
 @media print {
   body { background: #fff; color: #000; }
 }
+
+/* Mantener el deslizamiento nativo sin la barra de escritorio del navegador. */
+.horizontal-carousel {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 1.25rem;
+}
+.horizontal-carousel::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
