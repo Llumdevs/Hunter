@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/* Sistema visual de Hunter (design/mocks.html).
+   Modo noche: app del usuario. Modo día (.theme-day): panel del local. */
+@theme {
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-night-950: #0f0818;
+  --color-night-900: #170d24;
+  --color-night-800: #22143a;
+  --color-night-700: #33205a;
+  --color-ink: #f7f2fb;
+  --color-ink-muted: #b8a9c9;
+  --color-orange: #ff6a1f;
+  --color-orange-soft: #ff8a4c;
+  --color-lime: #c6f432;
+  --color-sky: #8cc8ff;
+  --color-rose: #ff5c9a;
+
+  --color-day-bg: #f5f1ed;
+  --color-day-card: #ffffff;
+  --color-day-ink: #1c1822;
+  --color-day-muted: #7c7585;
+  --color-tile-lime: #eef8cf;
+  --color-tile-sky: #dfeaf8;
+  --color-tile-sand: #fff0d3;
+  --color-tile-rose: #fde3ec;
+
+  --radius-card: 28px;
+  --radius-tile: 16px;
+}
+
+/* Colores semánticos: cambian con el tema, así los componentes sirven en noche y en día. */
+@theme inline {
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+}
+
+:root {
+  --fg: var(--color-ink);
+  --fg-muted: var(--color-ink-muted);
+  --surface: rgb(255 255 255 / 0.07);
+  --surface-line: rgb(255 255 255 / 0.13);
+}
+
+.theme-day {
+  --fg: var(--color-day-ink);
+  --fg-muted: var(--color-day-muted);
+  --surface: var(--color-day-card);
+  --surface-line: #ece6e0;
+}
+
+@layer base {
+  body {
+    min-height: 100dvh;
+    color: var(--fg);
+    background:
+      radial-gradient(120% 50% at 80% 0%, #3a1f63 0%, transparent 60%),
+      radial-gradient(90% 45% at 0% 100%, #4a1840 0%, transparent 60%),
+      var(--color-night-900);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* Superficie de cristal del modo noche */
+  .glass {
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    backdrop-filter: blur(14px);
+  }
+
+  /* Marcador de foto hasta tener fotos reales con permiso de cada local */
+  .photo-placeholder {
+    background:
+      radial-gradient(60% 70% at 30% 30%, #ff5c9a 0%, transparent 60%),
+      radial-gradient(60% 60% at 80% 70%, #6b3cff 0%, transparent 60%),
+      radial-gradient(40% 40% at 60% 20%, #ffb36b 0%, transparent 70%),
+      #2a0f3a;
+  }
+
+  .theme-day {
+    color: var(--fg);
+    background: var(--color-day-bg);
+  }
+
+  /* Fuera del contenido del panel tampoco debe verse el fondo de noche. */
+  body:has(.theme-day) {
+    background: var(--color-day-bg);
+  }
+}
+
+/* Pantalla de canje: el fondo se mueve, una captura no sirve. */
+@keyframes redemption-pulse {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.redemption-live {
+  background: linear-gradient(130deg, #c6f432, #ffb36b 35%, #ff6a1f 55%, #ff5c9a 80%, #c6f432);
+  background-size: 300% 300%;
+  animation: redemption-pulse 5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .redemption-live { animation-duration: 14s; }
+}
+
+@media print {
+  body { background: #fff; color: #000; }
+}

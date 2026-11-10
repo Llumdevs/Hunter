@@ -1,0 +1,86 @@
+# Hunter · app
+
+PWA (Next.js 16) + Supabase en local. Producto y decisiones: [`../brief-mvp-v2.md`](../brief-mvp-v2.md).
+
+## Requisitos
+- Node 22 y npm
+- Docker en marcha (para la base de datos local)
+
+## Comandos
+| Comando | Qué hace |
+|---|---|
+| `npm install` | Instala dependencias (incluida la CLI de Supabase) |
+| `npm run db:start` | Arranca Supabase local (Postgres 17 + PostGIS) |
+| `npm run db:reset` | Recrea la base de datos aplicando las migraciones |
+| `npm run db:test` | Tests pgTAP de `supabase/tests/database` |
+| `npm run db:lint` | Análisis estático de funciones (plpgsql_check) |
+| `npm run db:coverage` | Cobertura de sentencias y ramas de las funciones PL/pgSQL |
+| `npm run lint` · `npm run typecheck` · `npm run build` | Comprobaciones del frontend |
+| `npm run dev` | Servidor de desarrollo (http://127.0.0.1:3000) |
+| `npm test` | Tests unitarios (Vitest) |
+| `npm run test:coverage` | Cobertura de la lógica de `src/lib` |
+| `npm run test:mutation` | Mutación con Stryker sobre `src/lib` (umbral 80 %) |
+| `npm run test:integration` | Flujo completo contra Supabase local (antes: `npm run db:reset`) |
+| `npm run db:types` | Regenera `src/lib/supabase/database.types.ts` tras cambiar migraciones |
+
+### Probar el flujo en local
+1. `npm run db:reset` y `npm run dev`.
+2. Abre http://127.0.0.1:3000/c/30000000-0000-0000-0000-0000000000d1?k=demo-token-0123456789abcdef (bar de demostración, abierto 24 h).
+3. El código de acceso llega a Mailpit: http://127.0.0.1:54324.
+4. La cámara y la ubicación solo funcionan en `localhost`/`127.0.0.1` o con HTTPS.
+5. **Si cambias `supabase/config.toml`** (p. ej. las plantillas de correo), reinicia Supabase (`npm run db:stop && npm run db:start`):
+   `db:reset` no recarga la configuración de Auth.
+6. Tests E2E en navegador (Chromium, móvil): `npm run test:e2e` (`npx playwright install chromium` la primera vez).
+
+## Qué hay implementado
+Migraciones en `supabase/migrations/`:
+- `…_core_schema.sql`: ciudades, perfiles, organizadores, lugares, horarios, ofertas, prelistas, check-ins y canjes;
+  esquema `app` (no expuesto por la API) con secretos de QR, configuración y lógica de servidor; RLS en todas las tablas.
+- `…_retention.sql`: la latitud y la longitud de los check-ins se borran a los 60 días (`location_retention_days`);
+  se conservan `distance_m` y `geo_ok`. Tarea nocturna `purge-personal-data` con pg_cron (04:30 UTC).
+- `…_rate_limit.sql`: máximo 10 intentos de check-in y 10 de canje por usuario cada 10 minutos (configurable).
+  Los intentos fallidos también cuentan. Los registros de intentos se borran a las 24 h.
+
+### Sesión de apertura
+La noche de un check-in es la **fecha en que empezó la apertura del local** que contiene esa hora
+(`app.opening_session`). Un cierre igual o anterior a la apertura significa que cierra al día siguiente,
+así que un after de 23:00 a 09:00 funciona. La regla fija de 18:00 a 08:00 (`app.night_date`) queda para eventos sin horario.
+
+### API pública (únicas puertas de escritura)
+`public.check_in(p_place_id, p_static_token, p_screen_code, p_lat, p_lng)` y `public.redeem(p_checkin_id, p_offer_id)`.
+Usan el usuario de la sesión y la hora real, y **nunca lanzan errores de negocio**; devuelven:
+
+```ts
+type CheckInResult = { ok: true; checkin: Checkin } | { ok: false; error: CheckInError };
+type RedeemResult  = { ok: true; redemption: Redemption } | { ok: false; error: RedeemError };
+```
+
+Códigos de error: `rate_limited`, `place_unavailable`, `not_adult`, `qr_invalid`, `invalid_location`, `too_far`,
+`place_closed`, `already_checked_in`, `checkin_not_found`, `checkin_expired`, `offer_unavailable`, `offer_expired`,
+`already_redeemed`.
+
+**Límites por IP de Auth** (`[auth.rate_limit]` en `supabase/config.toml`): se dejan los valores por defecto
+(30 registros o inicios de sesión cada 5 min por IP). No se endurecen porque en una welcome week muchos
+estudiantes comparten la misma IP de la wifi. En el proyecto alojado hay que revisarlos en el panel o con `supabase config push`.
+
+### QR de pantalla
+Código = 8 primeros caracteres hex de `HMAC-SHA256(secreto_del_local, floor(epoch / 30))`.
+Se acepta el paso anterior, el actual y el siguiente (tolera 30 s de desfase de reloj en el dispositivo del local).
+El modo pantalla del panel (`/panel/[id]/pantalla`) lo calcula en el navegador con WebCrypto (`src/lib/venue/screen-code.ts`). Vectores de referencia (secreto `secret-1`):
+paso `59012345` → `43dd8124`, paso `0` → `da70af9b`. El navegador del local debe calcular lo mismo con WebCrypto.
+
+## Panel del local (`/panel`)
+Cifras por noche (apuntados, check-ins, canjes y canjes que se cobrarían), ofertas (crear, editar, pausar),
+QR fijo para imprimir y modo pantalla. Solo agregados: el local nunca ve datos individuales.
+Para dar acceso en local: `npm run db:grant-staff -- <email>` (bar de demostración por defecto).
+
+## Frontend implementado
+Login con código, alta de perfil (+18, validado también en RLS), página del QR `/c/[placeId]`, flujo de check-in y canje,
+pantalla de canje (`/canje/[id]`) y escáner (`/escanear`). La lógica está en `src/lib` con tests unitarios.
+
+## Pendiente (siguientes incrementos)
+- Frontend: «Esta noche», ficha del local y Mis planes. Inglés.
+- Panel del local: perfil agregado del público (con muestra mínima), gráfica semanal, alta de locales desde un admin.
+- Panel del local (incluido el modo pantalla) y vistas agregadas con muestra mínima.
+- Eventos (modo Fallas), valoraciones, preferencias y recomendación, puntos.
+- Límite por IP en las funciones públicas: requiere una capa delante de la API (proxy o CDN). Hoy el límite es por usuario.

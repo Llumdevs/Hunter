@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 40" role="img" aria-label="Hunter">
+  <text x="0" y="31" fill="#170d24" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-size="34" font-weight="800" letter-spacing="-1">H</text>
+  <g transform="translate(36 21)">
+    <circle r="12" fill="none" stroke="#ff6a1f" stroke-width="4"/>
+    <circle r="3.5" fill="#c6f432"/>
+    <path d="M0-17v6M0 11v6M-17 0h6M11 0h6" stroke="#ff6a1f" stroke-width="3.5" stroke-linecap="round"/>
+  </g>
+  <text x="56" y="31" fill="#170d24" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-size="34" font-weight="800" letter-spacing="-1">nter</text>
+</svg>

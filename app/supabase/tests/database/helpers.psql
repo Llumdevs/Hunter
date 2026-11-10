@@ -1,0 +1,86 @@
+-- Helpers compartidos por los tests pgTAP. Se incluyen con \ir; no es un test.
+-- Todo se crea dentro de la transacción de cada test y se descarta con el ROLLBACK.
+
+create extension if not exists pgtap with schema extensions;
+
+-- Hora de referencia: viernes 13/11/2026, 01:30 del sábado en Madrid (00:30 UTC).
+create function pg_temp.friday_night() returns timestamptz
+language sql immutable as $$ select '2026-11-14 00:30:00+00'::timestamptz $$;
+
+create function pg_temp.create_user(p_id uuid, p_name text, p_birthdate date) returns void
+language plpgsql as $$
+begin
+  insert into auth.users (id, email) values (p_id, p_name || '@test.local');
+  insert into public.profiles (id, display_name, birthdate) values (p_id, p_name, p_birthdate);
+end $$;
+
+create function pg_temp.login_as(p_user uuid) returns void
+language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', p_user, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+end $$;
+
+create function pg_temp.login_anon() returns void
+language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', json_build_object('role', 'anon')::text, true);
+  perform set_config('role', 'anon', true);
+end $$;
+
+-- Datos fijos de los tests:
+--   usuario adulto A, adulto B, menor M y personal del local S;
+--   un local activo en Ruzafa abierto todos los días de 20:00 a 03:00 y uno inactivo;
+--   una oferta activa todos los días sin hora límite.
+create function pg_temp.seed() returns void
+language plpgsql as $$
+begin
+  -- Aislamiento: la actividad que haya en la base (p. ej. del test de integración) no cuenta.
+  -- Se deshace con el ROLLBACK del test, así que no borra nada real.
+  delete from app.rate_limit_events;
+  delete from public.redemptions;
+  delete from public.checkins;
+  delete from public.signups;
+
+  perform pg_temp.create_user('00000000-0000-0000-0000-00000000000a', 'adult_a', '2000-01-01');
+  perform pg_temp.create_user('00000000-0000-0000-0000-00000000000b', 'adult_b', '1990-06-15');
+  perform pg_temp.create_user('00000000-0000-0000-0000-00000000000c', 'minor_m', '2010-03-03');
+  perform pg_temp.create_user('00000000-0000-0000-0000-00000000000d', 'staff_s', '1985-01-01');
+
+  insert into public.cities (id, name, timezone)
+  values ('10000000-0000-0000-0000-000000000001', 'Valencia', 'Europe/Madrid');
+
+  insert into public.organizers (id, kind, name)
+  values ('20000000-0000-0000-0000-000000000001', 'venue_owner', 'Bar Prueba SL');
+  insert into public.organizer_members (organizer_id, user_id, role)
+  values ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000d', 'owner');
+
+  insert into public.places (id, city_id, organizer_id, kind, slug, name, zone, address, location, is_active)
+  values
+    ('30000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
+     '20000000-0000-0000-0000-000000000001', 'bar', 'bar-prueba', 'Bar Prueba', 'Ruzafa',
+     'Calle de prueba 1', extensions.st_makepoint(-0.3730, 39.4620)::extensions.geography, true),
+    ('30000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001',
+     '20000000-0000-0000-0000-000000000001', 'bar', 'bar-cerrado', 'Bar Inactivo', 'Ruzafa',
+     'Calle de prueba 2', extensions.st_makepoint(-0.3740, 39.4630)::extensions.geography, false);
+
+  insert into public.place_opening_hours (place_id, weekday, opens_at, closes_at)
+  select p.id, d, '20:00', '03:00'
+  from generate_series(1, 7) d
+  cross join (values ('30000000-0000-0000-0000-000000000001'::uuid),
+                     ('30000000-0000-0000-0000-000000000002'::uuid)) p(id);
+
+  insert into app.place_qr (place_id, static_token, screen_secret)
+  values ('30000000-0000-0000-0000-000000000001', 'static-token-1', convert_to('secret-1', 'UTF8')),
+         ('30000000-0000-0000-0000-000000000002', 'static-token-2', convert_to('secret-2', 'UTF8'));
+
+  insert into public.offers (id, place_id, title, includes_alcohol, days_of_week)
+  values ('40000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001',
+          'Tapa gratis', false, '{1,2,3,4,5,6,7}');
+end $$;
+
+-- Coordenadas a ~20 m del local y a ~1 km.
+create function pg_temp.near_lat() returns double precision language sql immutable as $$ select 39.46215 $$;
+create function pg_temp.near_lng() returns double precision language sql immutable as $$ select -0.37310 $$;
+create function pg_temp.far_lat()  returns double precision language sql immutable as $$ select 39.47100 $$;

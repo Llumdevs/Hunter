@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hunter · Mocks v1</title>
+<style>
+  :root {
+    /* App del usuario (noche) */
+    --night-950: #0f0818; --night-900: #170d24; --night-800: #22143a; --night-700: #33205a;
+    --glass: rgba(255, 255, 255, 0.07); --glass-strong: rgba(255, 255, 255, 0.12); --glass-line: rgba(255, 255, 255, 0.13);
+    --ink: #f7f2fb; --ink-muted: #b8a9c9;
+    --orange: #ff6a1f; --orange-soft: #ff8a4c; --lime: #c6f432; --sky: #8cc8ff; --rose: #ff5c9a;
+    /* Panel del local (día) */
+    --day-bg: #f5f1ed; --day-card: #ffffff; --day-ink: #1c1822; --day-muted: #7c7585;
+    --tile-lime: #eef8cf; --tile-sky: #dfeaf8; --tile-sand: #fff0d3; --tile-rose: #fde3ec;
+    --radius-xl: 28px; --radius-lg: 22px; --radius-md: 16px; --radius-pill: 999px;
+    --font: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: radial-gradient(circle at 20% 0%, #efe4f7, #f7efe9 60%); color: #2a2230; padding: 40px 24px 80px; }
+  header.doc { max-width: 1240px; margin: 0 auto 32px; }
+  header.doc h1 { font-size: 32px; letter-spacing: -0.02em; }
+  header.doc p { color: #6d6475; margin-top: 6px; max-width: 760px; line-height: 1.5; }
+  .board { display: flex; flex-wrap: wrap; gap: 40px 32px; justify-content: center; max-width: 1400px; margin: 0 auto; }
+  figure { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  figcaption { font-size: 14px; color: #5d5466; text-align: center; max-width: 360px; line-height: 1.4; }
+  figcaption b { color: #231b29; display: block; font-size: 15px; }
+
+  /* Marco de teléfono */
+  .phone { width: 360px; height: 760px; border-radius: 50px; padding: 10px; background: #1b1320; box-shadow: 0 30px 60px -20px rgba(60, 20, 70, 0.45); }
+  .screen { position: relative; width: 100%; height: 100%; border-radius: 42px; overflow: hidden; }
+  .status { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 26px; font-size: 14px; font-weight: 600; }
+  .island { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 110px; height: 30px; background: #000; border-radius: 20px; }
+  .night { background: radial-gradient(120% 60% at 80% 0%, #3a1f63 0%, transparent 60%), radial-gradient(90% 50% at 0% 100%, #4a1840 0%, transparent 60%), var(--night-900); color: var(--ink); }
+  .day { background: var(--day-bg); color: var(--day-ink); }
+  .content { padding: 4px 18px 120px; display: flex; flex-direction: column; gap: 13px; }
+
+  /* Piezas comunes */
+  .row { display: flex; align-items: center; gap: 10px; }
+  .between { justify-content: space-between; }
+  .muted { color: var(--ink-muted); }
+  .day .muted { color: var(--day-muted); }
+  .icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--glass-strong); border: 1px solid var(--glass-line); backdrop-filter: blur(12px); }
+  .day .icon-btn { background: #fff; border-color: #ece6e0; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #ffb07a, #b05cff); border: 2px solid rgba(255, 255, 255, 0.5); }
+  .avatars { display: flex; }
+  .avatars span { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--night-800); margin-left: -8px; background: linear-gradient(135deg, #ffd0a8, #e07aa8); }
+  .avatars span:nth-child(2) { background: linear-gradient(135deg, #a8d8ff, #7a6be0); }
+  .avatars span:nth-child(3) { background: linear-gradient(135deg, #d6ff9a, #4fb38a); }
+  .avatars span:first-child { margin-left: 0; }
+  .hello b { font-size: 17px; display: block; }
+  .hello small { font-size: 13px; }
+  .headline { font-size: 27px; line-height: 1.08; font-weight: 800; letter-spacing: -0.01em; text-transform: uppercase; }
+  .headline em { font-style: normal; color: var(--ink-muted); }
+  .search { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 6px 0 16px; border-radius: var(--radius-pill); background: var(--glass); border: 1px solid var(--glass-line); color: var(--ink-muted); font-size: 14px; }
+  .search .go { margin-left: auto; width: 40px; height: 40px; border-radius: 50%; background: var(--orange); display: grid; place-items: center; color: #fff; }
+  .chips { display: flex; gap: 8px; overflow: hidden; }
+  .chip { flex: none; height: 36px; padding: 0 14px; border-radius: var(--radius-pill); display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; background: var(--glass); border: 1px solid var(--glass-line); }
+  .chip.on { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .section-title { display: flex; justify-content: space-between; align-items: baseline; }
+  .section-title h2 { font-size: 18px; font-weight: 700; }
+  .section-title a { font-size: 13px; color: var(--ink-muted); text-decoration: none; }
+  .day .section-title a { color: var(--day-muted); }
+
+  /* Fotos de marcador (sustituir por fotos reales con permiso del local) */
+  .photo { position: relative; border-radius: var(--radius-lg); overflow: hidden; }
+  .photo::after { content: "FOTO DEL LOCAL"; position: absolute; left: 12px; bottom: 10px; font-size: 9px; letter-spacing: 0.12em; color: rgba(255, 255, 255, 0.55); }
+  .ph-club { background: radial-gradient(60% 70% at 30% 30%, #ff5c9a 0%, transparent 60%), radial-gradient(60% 60% at 80% 70%, #6b3cff 0%, transparent 60%), radial-gradient(40% 40% at 60% 20%, #ffb36b 0%, transparent 70%), #2a0f3a; }
+  .ph-bar { background: radial-gradient(60% 70% at 70% 30%, #ffb36b 0%, transparent 60%), radial-gradient(70% 60% at 20% 80%, #c2410c 0%, transparent 60%), #3a1a12; }
+  .ph-live { background: radial-gradient(50% 60% at 50% 20%, #8cc8ff 0%, transparent 60%), radial-gradient(70% 60% at 30% 90%, #1d4ed8 0%, transparent 60%), #0b1633; }
+  .ph-verbena { background: radial-gradient(40% 40% at 25% 25%, #fde047 0%, transparent 60%), radial-gradient(40% 40% at 75% 30%, #fb7185 0%, transparent 60%), radial-gradient(60% 60% at 50% 90%, #f97316 0%, transparent 60%), #2b1306; }
+
+  /* Mapa (ilustración) */
+  .minimap { position: relative; height: 118px; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--glass-line);
+    background: linear-gradient(115deg, transparent 47%, rgba(255,255,255,0.08) 48%, rgba(255,255,255,0.08) 52%, transparent 53%),
+                linear-gradient(25deg, transparent 47%, rgba(255,255,255,0.06) 48%, rgba(255,255,255,0.06) 51%, transparent 52%),
+                linear-gradient(160deg, transparent 60%, rgba(255,255,255,0.05) 61%, rgba(255,255,255,0.05) 63%, transparent 64%),
+                #1d1230; }
+  .pin { position: absolute; width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--night-900); }
+  .pin.match { background: var(--lime); box-shadow: 0 0 0 6px rgba(198, 244, 50, 0.18); }
+  .pin.discover { background: var(--orange); box-shadow: 0 0 0 6px rgba(255, 106, 31, 0.18); }
+  .pin.me { background: var(--sky); box-shadow: 0 0 0 10px rgba(140, 200, 255, 0.2); }
+  .map-cta { position: absolute; right: 10px; bottom: 10px; font-size: 12px; font-weight: 700; padding: 8px 12px; border-radius: var(--radius-pill); background: rgba(15, 8, 24, 0.75); border: 1px solid var(--glass-line); }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--ink-muted); }
+  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+
+  /* Tarjeta de local (carrusel) */
+  .carousel { display: flex; gap: 12px; margin-right: -18px; }
+  .venue-card { flex: none; width: 250px; padding: 10px; border-radius: var(--radius-xl); background: var(--glass); border: 1px solid var(--glass-line); backdrop-filter: blur(14px); display: flex; flex-direction: column; gap: 10px; }
+  .venue-card .photo { height: 96px; }
+  .badge { position: absolute; top: 10px; display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; }
+  .badge.match { left: 10px; background: var(--lime); color: #1b2400; }
+  .badge.heart { right: 10px; width: 30px; height: 30px; padding: 0; justify-content: center; background: rgba(0, 0, 0, 0.35); color: #fff; }
+  .venue-card h3 { font-size: 16px; font-weight: 700; }
+  .meta { font-size: 12px; color: var(--ink-muted); display: flex; align-items: center; gap: 6px; }
+  .reason { font-size: 12px; color: var(--lime); }
+  .price { margin-left: auto; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-pill); background: var(--glass-strong); }
+
+  /* Lista compacta "También te puede gustar" */
+  .mini-card { display: flex; gap: 12px; align-items: center; padding: 8px; border-radius: var(--radius-lg); background: var(--glass); border: 1px solid var(--glass-line); }
+  .mini-card .photo { width: 64px; height: 64px; border-radius: var(--radius-md); flex: none; }
+  .mini-card .photo::after { display: none; }
+  .mini-card b { font-size: 14px; display: block; }
+  .tag-discover { font-size: 11px; color: var(--orange-soft); }
+
+  /* Navegación inferior flotante con botón central de escanear */
+  .tabbar { position: absolute; left: 14px; right: 14px; bottom: 18px; height: 70px; border-radius: 36px; background: rgba(28, 16, 44, 0.82); border: 1px solid var(--glass-line); backdrop-filter: blur(18px); display: flex; align-items: center; justify-content: space-around; padding: 0 8px; }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--ink-muted); width: 56px; }
+  .tab.on { color: var(--ink); }
+  .tab.on .icon { stroke: var(--orange); }
+  .scan-fab { width: 62px; height: 62px; border-radius: 50%; background: var(--orange); display: grid; place-items: center; color: #fff; margin-top: -34px; box-shadow: 0 10px 24px -6px rgba(255, 106, 31, 0.7); border: 5px solid var(--night-900); }
+  .scan-fab .icon { width: 26px; height: 26px; }
+
+  /* Ficha */
+  .hero { position: relative; height: 250px; }
+  .hero .photo { position: absolute; inset: 0; border-radius: 0; }
+  .hero .bar { position: absolute; top: 52px; left: 18px; right: 18px; display: flex; justify-content: space-between; }
+  .hero .icon-btn { background: rgba(0, 0, 0, 0.35); }
+  .sheet { position: relative; margin-top: -40px; border-radius: 32px 32px 0 0; background: var(--night-900); padding: 34px 18px 120px; display: flex; flex-direction: column; gap: 12px; }
+  .rating { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); background: #fff; color: #1c1822; font-weight: 800; font-size: 14px; padding: 7px 14px; border-radius: var(--radius-pill); display: flex; gap: 6px; align-items: center; box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.5); }
+  .sheet h1 { font-size: 26px; font-weight: 800; text-align: center; }
+  .sheet .sub { text-align: center; font-size: 13px; color: var(--ink-muted); }
+  .tags { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .tags span { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: var(--radius-pill); background: var(--glass-strong); }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .tile { border-radius: var(--radius-md); padding: 12px 6px; text-align: center; color: #1c1822; }
+  .tile small { display: block; font-size: 11px; color: #5d5466; margin-bottom: 6px; }
+  .tile b { font-size: 15px; }
+  .t-lime { background: var(--tile-lime); } .t-sky { background: var(--tile-sky); } .t-sand { background: var(--tile-sand); } .t-rose { background: var(--tile-rose); }
+  .crowd { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: var(--radius-lg); background: var(--glass); border: 1px solid var(--glass-line); font-size: 13px; }
+  .meter { flex: 1; height: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 68%; background: linear-gradient(90deg, var(--lime), var(--orange)); }
+  .offer { position: relative; padding: 16px; border-radius: var(--radius-lg); background: linear-gradient(135deg, rgba(255, 106, 31, 0.22), rgba(255, 92, 154, 0.12)); border: 1px dashed rgba(255, 138, 76, 0.7); }
+  .offer small { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--orange-soft); font-weight: 700; }
+  .offer b { display: block; font-size: 18px; margin: 4px 0; }
+  .offer p { font-size: 12px; color: var(--ink-muted); }
+  .cta { position: absolute; left: 18px; right: 18px; bottom: 26px; height: 58px; border-radius: var(--radius-pill); background: var(--orange); color: #fff; font-weight: 800; font-size: 16px; display: grid; place-items: center; box-shadow: 0 14px 30px -10px rgba(255, 106, 31, 0.8); }
+  .cta.secondary { background: var(--glass-strong); box-shadow: none; border: 1px solid var(--glass-line); }
+
+  /* Check-in hecho */
+  .success { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 0 4px; text-align: center; }
+  .success .ring { width: 86px; height: 86px; border-radius: 50%; display: grid; place-items: center; background: rgba(198, 244, 50, 0.14); border: 2px solid var(--lime); color: var(--lime); }
+  .success .ring .icon { width: 40px; height: 40px; stroke-width: 2.5; }
+  .success h1 { font-size: 26px; font-weight: 800; }
+  .points { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; font-weight: 700; color: #1b2400; background: var(--lime); padding: 6px 12px; border-radius: var(--radius-pill); }
+  .unlocked { padding: 18px; border-radius: var(--radius-xl); background: var(--glass); border: 1px solid var(--glass-line); display: flex; flex-direction: column; gap: 12px; }
+  .unlocked .top { display: flex; gap: 12px; align-items: center; }
+  .unlocked .photo { width: 58px; height: 58px; border-radius: var(--radius-md); flex: none; }
+  .unlocked .photo::after { display: none; }
+  .note { font-size: 12px; color: var(--ink-muted); line-height: 1.45; }
+  .slide { position: relative; height: 60px; padding-left: 50px; border-radius: var(--radius-pill); background: var(--glass-strong); border: 1px solid var(--glass-line); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: var(--ink-muted); }
+  .slide .knob { position: absolute; left: 5px; top: 5px; width: 50px; height: 50px; border-radius: 50%; background: var(--orange); display: grid; place-items: center; color: #fff; }
+
+  /* Canje */
+  .redeem { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; color: #12091c; padding: 0 22px;
+    background: linear-gradient(130deg, #c6f432, #ffb36b 35%, #ff6a1f 55%, #ff5c9a 80%, #c6f432); background-size: 300% 300%; animation: pulse 5s linear infinite; }
+  @keyframes pulse { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  .redeem .place { font-weight: 700; font-size: 16px; opacity: 0.8; }
+  .redeem h1 { font-size: 40px; line-height: 1.02; font-weight: 900; letter-spacing: -0.02em; }
+  .clock { font-size: 64px; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+  .code { font-family: ui-monospace, Menlo, monospace; font-size: 30px; font-weight: 800; letter-spacing: 0.18em; background: #12091c; color: #fff; padding: 10px 18px; border-radius: var(--radius-md); }
+  .valid { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 800; background: rgba(255, 255, 255, 0.55); padding: 10px 18px; border-radius: var(--radius-pill); }
+  .redeem .hint { font-size: 13px; font-weight: 600; opacity: 0.75; max-width: 260px; }
+
+  /* Panel del local (día) */
+  .panel-head { display: flex; justify-content: space-between; align-items: center; }
+  .panel-head h1 { font-size: 24px; font-weight: 800; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kpi { border-radius: var(--radius-lg); padding: 10px 8px; text-align: center; }
+  .kpi b { font-size: 28px; font-weight: 800; display: block; }
+  .kpi small { font-size: 12px; color: #5d5466; }
+  .card { background: var(--day-card); border-radius: var(--radius-xl); padding: 14px; box-shadow: 0 10px 30px -18px rgba(60, 40, 30, 0.35); display: flex; flex-direction: column; gap: 12px; }
+  .bars { display: flex; align-items: flex-end; gap: 10px; height: 74px; padding-top: 6px; }
+  .bars div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .bars span { width: 100%; display: flex; gap: 3px; align-items: flex-end; height: 100%; }
+  .bars i { flex: 1; border-radius: 6px 6px 3px 3px; }
+  .bars i.s { background: #e6dfd8; } .bars i.c { background: var(--orange); }
+  .bars small { font-size: 11px; color: var(--day-muted); }
+  .key { display: flex; gap: 14px; font-size: 11px; color: var(--day-muted); }
+  .key i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .offer-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border-radius: var(--radius-md); background: #faf7f4; }
+  .offer-row b { font-size: 14px; display: block; }
+  .offer-row small { font-size: 12px; color: var(--day-muted); }
+  .switch { width: 50px; height: 30px; border-radius: 15px; background: var(--orange); position: relative; flex: none; }
+  .switch::after { content: ""; position: absolute; top: 3px; right: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; }
+  .switch.off { background: #ddd5ce; }
+  .switch.off::after { right: auto; left: 3px; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .action { border-radius: var(--radius-lg); padding: 12px; font-weight: 700; font-size: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .action.dark { background: #1c1822; color: #fff; }
+  .action.light { background: var(--tile-lime); }
+  .billing { font-size: 12px; color: var(--day-muted); }
+  .billing b { color: var(--day-ink); }
+
+  /* Onboarding */
+  .onboard { height: 100%; position: relative; }
+  .onboard .photo { position: absolute; inset: 0; border-radius: 0; }
+  .onboard .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15, 8, 24, 0) 30%, rgba(15, 8, 24, 0.95) 72%); }
+  .onboard .copy { position: absolute; left: 22px; right: 22px; bottom: 34px; display: flex; flex-direction: column; gap: 14px; }
+  .onboard h1 { font-size: 40px; line-height: 1; font-weight: 900; letter-spacing: -0.02em; }
+  .onboard h1 span { color: var(--orange); }
+  .onboard p { font-size: 15px; color: var(--ink-muted); line-height: 1.45; }
+  .stamp { position: absolute; top: 120px; right: 34px; width: 84px; height: 84px; border-radius: 50%; border: 2px solid var(--lime); color: var(--lime); display: grid; place-items: center; font-weight: 900; font-size: 18px; transform: rotate(-14deg); background: rgba(15, 8, 24, 0.4); }
+  .onboard .cta { position: static; }
+  .lang { font-size: 13px; text-align: center; color: var(--ink-muted); }
+
+  .notes { max-width: 1240px; margin: 48px auto 0; background: #fff; border-radius: 24px; padding: 24px 28px; line-height: 1.6; color: #3b3342; }
+  .notes h2 { font-size: 20px; margin-bottom: 8px; }
+  .notes ul { padding-left: 20px; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 4px; }
+  .swatches div { width: 120px; font-size: 12px; }
+  .swatches span { display: block; height: 44px; border-radius: 12px; margin-bottom: 6px; border: 1px solid #0001; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M7 12h10"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M13 6v12" stroke-dasharray="2 2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3"/></symbol>
+    <symbol id="i-screen" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
+  </defs>
+</svg>
+
+<header class="doc">
+  <h1>Hunter · Mocks v1</h1>
+  <p>Dirección visual: la app del usuario va en <b>modo noche</b> (morado profundo con superficies de cristal, inspirado en la referencia oscura) con la <b>claridad de la referencia clara</b>: baldosas de datos, chips en píldora y un naranja fuerte para la acción principal. El <b>verde lima</b> marca lo que encaja contigo. El panel del local va en <b>modo día</b>, porque se usa en la barra o en el ordenador. Los degradados son marcadores: van fotos reales de cada local.</p>
+</header>
+
+<main class="board">
+
+  <!-- 1. Bienvenida -->
+  <figure>
+    <div class="phone"><div class="screen night">
+      <div class="onboard">
+        <div class="photo ph-club"></div><div class="shade"></div>
+        <div class="island"></div>
+        <div class="status"><span>23:30</span><span>●●● ▮</span></div>
+        <div class="stamp">+18</div>
+        <div class="copy">
+          <h1>Sabe dónde vas<br><span>antes de ir.</span></h1>
+          <p>Qué música suena, qué gente va y cómo de lleno está esta noche. Apúntate, escanea al llegar y llévate la oferta.</p>
+          <div class="cta">Empezar</div>
+          <div class="lang">Español · English</div>
+        </div>
+      </div>
+    </div></div>
+    <figcaption><b>1 · Bienvenida</b>Foto a sangre con mucho ambiente, titular grande y una sola acción. Idioma visible desde el primer momento.</figcaption>
+  </figure>
+
+  <!-- 2. Esta noche -->
+  <figure>
+    <div class="phone"><div class="screen night">
+      <div class="island"></div>
+      <div class="status"><span>23:30</span><span>●●● ▮</span></div>
+      <div class="content">
+        <div class="row between">
+          <div class="row"><div class="avatar"></div><div class="hello"><b>Hola, Luz</b><small class="muted">Viernes · Ruzafa</small></div></div>
+          <div class="icon-btn"><svg class="icon"><use href="#i-sliders"/></svg></div>
+        </div>
+        <div class="headline">Esta noche<br><em>en Valencia</em></div>
+        <div class="chips">
+          <span class="chip on">Para ti</span><span class="chip">Para bailar</span><span class="chip">Para hablar</span><span class="chip">Directo</span>
+        </div>
+        <div class="minimap">
+          <i class="pin match" style="left:22%;top:30%"></i><i class="pin match" style="left:58%;top:52%"></i>
+          <i class="pin discover" style="left:76%;top:24%"></i><i class="pin discover" style="left:34%;top:70%"></i>
+          <i class="pin me" style="left:46%;top:38%"></i>
+          <span class="map-cta">Ver mapa</span>
+        </div>
+        <div class="legend"><span><i style="background:var(--lime)"></i>Encaja contigo</span><span><i style="background:var(--orange)"></i>Para descubrir</span><span><i style="background:var(--sky)"></i>Tú</span></div>
+        <div class="section-title"><h2>Para ti</h2><a href="#">Ver todo</a></div>
+        <div class="carousel">
+          <div class="venue-card">
+            <div class="photo ph-club"><span class="badge match">✓ Encaja</span><span class="badge heart"><svg class="icon" style="width:16px;height:16px"><use href="#i-heart"/></svg></span></div>
+            <div class="row"><h3>Sala Neón</h3><span class="price">€€</span></div>
+            <div class="meta"><svg class="icon" style="width:14px;height:14px"><use href="#i-pin"/></svg>Ruzafa · 450 m · House</div>
+            <div class="reason">Tu música y el ambiente que buscas</div>
+            <div class="row"><div class="avatars"><span></span><span></span><span></span></div><span class="meta">Mayoría 25-30 · 34 apuntados</span></div>
+          </div>
+          <div class="venue-card">
+            <div class="photo ph-bar"><span class="badge match">✓ Encaja</span></div>
+            <div class="row"><h3>La Terraza</h3><span class="price">€</span></div>
+            <div class="meta">El Carmen · 1,1 km</div>
+          </div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div class="tab on"><svg class="icon"><use href="#i-home"/></svg>Esta noche</div>
+        <div class="tab"><svg class="icon"><use href="#i-map"/></svg>Mapa</div>
+        <div class="scan-fab"><svg class="icon"><use href="#i-scan"/></svg></div>
+        <div class="tab"><svg class="icon"><use href="#i-ticket"/></svg>Mis planes</div>
+        <div class="tab"><svg class="icon"><use href="#i-user"/></svg>Perfil</div>
+      </div>
+    </div></div>
+    <figcaption><b>2 · Esta noche</b>Minimapa con los colores del brief, chips de ambiente y tarjetas con el motivo del encaje. El botón central siempre lleva al escáner.</figcaption>
+  </figure>
+
+  <!-- 3. Ficha del local -->
+  <figure>
+    <div class="phone"><div class="screen night">
+      <div class="hero"><div class="photo ph-live"></div>
+        <div class="island"></div>
+        <div class="bar"><div class="icon-btn"><svg class="icon"><use href="#i-back"/></svg></div><div class="icon-btn"><svg class="icon"><use href="#i-share"/></svg></div></div>
+      </div>
+      <div class="sheet">
+        <div class="rating"><svg class="icon" style="width:16px;height:16px;fill:var(--orange);stroke:var(--orange)"><use href="#i-star"/></svg>4,6 · 128 valoraciones</div>
+        <div><h1>Sala Neón</h1><p class="sub">Discoteca · Ruzafa · Abierto hasta las 06:00</p></div>
+        <div class="tags"><span>Bailar hasta tarde</span><span>Guiri-friendly</span></div>
+        <div class="tiles">
+          <div class="tile t-lime"><small>Público</small><b>25-30</b></div>
+          <div class="tile t-sky"><small>Música</small><b>House</b></div>
+          <div class="tile t-sand"><small>Precio</small><b>€€</b></div>
+          <div class="tile t-rose"><small>Hablar</small><b>Difícil</b></div>
+        </div>
+        <div class="crowd"><span>Ahora</span><div class="meter"><i></i></div><b>Animado</b></div>
+        <div class="offer"><small>Oferta por apuntarte</small><b>Entrada reducida + chupito sin alcohol</b><p>Se activa al hacer check-in en el local · hasta la 01:00</p></div>
+      </div>
+      <div class="cta">Apuntarme a la prelista</div>
+    </div></div>
+    <figcaption><b>3 · Ficha del local</b>Baldosas de datos de colores (de la referencia clara) sobre la hoja oscura. El dato de afluencia y la oferta antes del botón.</figcaption>
+  </figure>
+
+  <!-- 4. Check-in hecho -->
+  <figure>
+    <div class="phone"><div class="screen night">
+      <div class="island"></div>
+      <div class="status"><span>00:42</span><span>●●● ▮</span></div>
+      <div class="content">
+        <div class="row between"><div class="icon-btn"><svg class="icon"><use href="#i-back"/></svg></div><span class="muted" style="font-size:14px">Sala Neón</span><span style="width:44px"></span></div>
+        <div class="success">
+          <div class="ring"><svg class="icon"><use href="#i-check"/></svg></div>
+          <h1>¡Ya estás dentro!</h1>
+          <span class="points">+10 puntos</span>
+        </div>
+        <div class="unlocked">
+          <div class="top"><div class="photo ph-club"></div><div><small class="tag-discover">OFERTA DESBLOQUEADA</small><b style="display:block;font-size:17px">Entrada reducida + chupito sin alcohol</b></div></div>
+          <p class="note">Cuando estés en la barra, desliza para canjear y enseña la pantalla. Dura 15 minutos y solo se puede usar una vez.</p>
+          <div class="slide"><span class="knob"><svg class="icon"><use href="#i-arrow"/></svg></span>Desliza para canjear</div>
+        </div>
+        <p class="note" style="text-align:center">Mañana a las 12:00 te preguntaremos qué tal. Tu valoración ayuda a otros a acertar.</p>
+      </div>
+    </div></div>
+    <figcaption><b>4 · Check-in hecho</b>Confirmación clara, puntos y un control deslizante para canjear: evita canjes por error en el bolsillo.</figcaption>
+  </figure>
+
+  <!-- 5. Canje -->
+  <figure>
+    <div class="phone"><div class="screen">
+      <div class="redeem">
+        <span class="place">Sala Neón</span>
+        <h1>Entrada reducida + chupito</h1>
+        <div class="clock">00:43:17</div>
+        <div class="code">04E-879</div>
+        <div class="valid"><svg class="icon"><use href="#i-clock"/></svg>Válido 14:32</div>
+        <p class="hint">Enseña esta pantalla al camarero. El fondo se mueve: una captura no sirve.</p>
+      </div>
+    </div></div>
+    <figcaption><b>5 · Canje</b>Lo que ya funciona, con la paleta nueva: degradado animado, reloj con segundos, código corto y cuenta atrás.</figcaption>
+  </figure>
+
+  <!-- 6. Panel del local -->
+  <figure>
+    <div class="phone"><div class="screen day">
+      <div class="island"></div>
+      <div class="status"><span>19:05</span><span>●●● ▮</span></div>
+      <div class="content" style="padding-bottom:24px;gap:10px">
+        <div class="panel-head"><div><small class="muted" style="font-size:13px">Tu local</small><h1>Sala Neón</h1></div><div class="icon-btn"><svg class="icon"><use href="#i-bell"/></svg></div></div>
+        <div class="kpis">
+          <div class="kpi t-sand"><b>42</b><small>Apuntados</small></div>
+          <div class="kpi t-lime"><b>15</b><small>Check-ins</small></div>
+          <div class="kpi t-sky"><b>11</b><small>Canjes</small></div>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Última semana</h2><a href="#">36 % check-in</a></div>
+          <div class="bars">
+            <div><span><i class="s" style="height:40%"></i><i class="c" style="height:14%"></i></span><small>L</small></div>
+            <div><span><i class="s" style="height:30%"></i><i class="c" style="height:12%"></i></span><small>M</small></div>
+            <div><span><i class="s" style="height:52%"></i><i class="c" style="height:22%"></i></span><small>X</small></div>
+            <div><span><i class="s" style="height:66%"></i><i class="c" style="height:24%"></i></span><small>J</small></div>
+            <div><span><i class="s" style="height:92%"></i><i class="c" style="height:36%"></i></span><small>V</small></div>
+            <div><span><i class="s" style="height:100%"></i><i class="c" style="height:40%"></i></span><small>S</small></div>
+            <div><span><i class="s" style="height:20%"></i><i class="c" style="height:8%"></i></span><small>D</small></div>
+          </div>
+          <div class="key"><span><i style="background:#e6dfd8"></i>Apuntados</span><span><i style="background:var(--orange)"></i>Check-ins</span></div>
+          <p class="billing">Clientes nuevos que se cobrarían esta semana: <b>23</b> · durante el piloto no se factura</p>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Ofertas</h2><a href="#">+ Nueva</a></div>
+          <div class="offer-row"><div><b>Entrada reducida + chupito</b><small>L M X J · hasta 01:00</small></div><span class="switch"></span></div>
+          <div class="offer-row"><div><b>2x1 en vermut</b><small>S D</small></div><span class="switch off"></span></div>
+        </div>
+        <div class="actions">
+          <div class="action dark"><svg class="icon"><use href="#i-qr"/></svg>QR para imprimir</div>
+          <div class="action light"><svg class="icon"><use href="#i-screen"/></svg>Modo pantalla</div>
+        </div>
+      </div>
+    </div></div>
+    <figcaption><b>6 · Panel del local</b>Modo día con la estructura de la referencia clara: cifras en baldosas, apuntados frente a check-ins por día y ofertas con interruptor.</figcaption>
+  </figure>
+
+</main>
+
+<section class="notes">
+  <h2>Sistema visual propuesto</h2>
+  <div class="swatches">
+    <div><span style="background:#170d24"></span>Noche #170D24</div>
+    <div><span style="background:#33205a"></span>Morado #33205A</div>
+    <div><span style="background:#ff6a1f"></span>Naranja acción #FF6A1F</div>
+    <div><span style="background:#c6f432"></span>Lima «encaja» #C6F432</div>
+    <div><span style="background:#8cc8ff"></span>Azul «tú» #8CC8FF</div>
+    <div><span style="background:#ff5c9a"></span>Rosa acento #FF5C9A</div>
+    <div><span style="background:#f5f1ed"></span>Día #F5F1ED</div>
+  </div>
+  <ul>
+    <li><b>Tipografía:</b> geométrica y redondeada (propuesta: Plus Jakarta Sans), titulares en mayúsculas para «Esta noche». En los mocks se ve la fuente del sistema si no la tienes instalada.</li>
+    <li><b>Formas:</b> radios grandes (16-28 px), píldoras para chips y botones, cristal translúcido en modo noche y sombras suaves en modo día.</li>
+    <li><b>Iconos:</b> de línea, estilo Lucide (librería abierta, sin assets externos).</li>
+    <li><b>Accesibilidad:</b> el naranja sobre blanco no basta para texto pequeño; el texto de los botones naranjas va en blanco y negrita a 16 px o más.</li>
+  </ul>
+</section>
+</body>
+</html>
