@@ -48,3 +48,7 @@ reports
 # playwright
 /test-results
 /playwright-report
+
+# Estado local de Supabase; puede contener credenciales de contenedores.
+/supabase/.temp/
+/supabase/.branches/

@@ -1,54 +1,72 @@
-# Comparación de Hunter con el piloto «Rumbo»
+# Hunter frente al piloto «Rumbo»
 
-Revisión del 10 de noviembre de 2026. Basada en las seis capturas aportadas
-(una repetida) y en el código de Hunter. El enlace de Claude no pudo abrirse:
-el proxy del entorno devuelve HTTP 403. Las capturas muestran pantallas;
-no demuestran que todas sus funciones estén implementadas en el artifact.
+Revisión actualizada el 10 de noviembre de 2026 a partir de las capturas compartidas.
+El enlace de Claude está bloqueado por la red (HTTP 403); la revisión visual no
+permite comprobar las interacciones que no aparecen en las capturas.
 
-## Diferencia de alcance
+## Implementado en esta entrega
 
-El piloto declara que guarda los datos solo en el navegador y usa locales y ofertas
-de ejemplo. Hunter tiene autenticación, base de datos, políticas de acceso,
-funciones de check-in y canje, y panel del local. No hay que sustituir ese backend
-por almacenamiento local ni copiar el aviso de que «no se envían datos a ningún servidor»:
-en Hunter sería falso. «Rumbo» es la marca de la referencia, no un cambio de nombre aprobado.
+| Función | Implementación |
+| --- | --- |
+| Porcentaje de encaje | Se muestra el porcentaje calculado por los gustos y pesos existentes. Sin gustos no se inventa un porcentaje. |
+| Filtros temporales | Música, ambiente y presupuesto, combinables. Se pueden quitar y no modifican los gustos guardados. |
+| Tarjeta del mapa | Selección mediante ratón, toque o teclado, nombre, zona, precio, distancia si hay ubicación, encaje, oferta de esa noche y enlace al local. |
+| Procedencia | Campo opcional de hasta 80 caracteres, editable en el perfil privado. |
+| Resumen del perfil | Contacto propio, edad propia, procedencia, planes activos apuntados, check-ins, valoraciones y puntos. |
+| Feedback | Entre 10 y 2000 caracteres, confirmación de guardado, máximo cinco mensajes por usuario y día. Solo el autor puede leer sus mensajes desde la app. |
+| Amigos | Código aleatorio por usuario, enviar solicitud, aceptar, rechazar, cancelar y eliminar amistad. No permite buscar por email ni compartir ubicaciones o planes. Límite de 20 intentos de solicitud diarios, incluidos los inválidos. |
+| Valoraciones | De 1 a 5 estrellas y comentario opcional de hasta 500 caracteres. Solo check-ins propios verificados y no marcados; una valoración por visita. Los comentarios son privados. |
+| Media del local | Se muestra a usuarios con perfil cuando hay al menos tres valoraciones verificadas; no se publican autores ni comentarios. |
+| Puntos del piloto | Se calculan en servidor: 10 por check-in verificado no marcado y 5 por valoración. El cliente no puede escribir puntos ni duplicar una valoración. Sin valor económico. |
 
-## Qué está y qué falta
+Continúan implementados gustos, recomendaciones explicables, mapa esquemático,
+prelistas, check-in, canje, panel del local y fotos. El login por enlace y el acceso
+de invitado están en la corrección anterior.
 
-| Elemento visible | Estado en Hunter | Trabajo pendiente |
-| --- | --- | --- |
-| Preferencias de música, ambiente y presupuesto | Implementadas y persistidas; además se pueden elegir rangos de edad | Ajustar textos y presentación si se quiere acercar al piloto |
-| «Para ti» y explicación del encaje | Implementados con pesos configurables y tests | Mostrar el porcentaje calculado: hoy la tarjeta muestra «Encaja» |
-| «También te puede gustar» | Implementado por menor coincidencia con los gustos | El texto del piloto promete buenas valoraciones; faltan valoraciones y su uso en este orden |
-| Minimap y mapa con colores, ubicación y distancias | Implementados con coordenadas reales | Son esquemáticos, sin calles ni barrios dibujados; el piloto tiene un fondo ilustrado. Un mapa navegable real requeriría otra implementación |
-| Tocar un punto y ver una tarjeta sobre el mapa | Parcial | Hoy el punto abre la ficha directamente; falta selección del punto, tarjeta superpuesta, oferta y botón «Ver el local» |
-| Filtros y chips en «Esta noche» | Parcial | Hay acceso a editar gustos; faltan filtros temporales de esa noche, chips activos y fecha visible |
-| Mis planes, apuntarse, check-in y canje | Implementados | Las capturas no muestran el detalle de Mis planes; no se puede comparar ese flujo completo |
-| Amigos y aviso «1» | Ausente | Faltan pantalla, relaciones, invitaciones, solicitudes y permisos de visibilidad. La captura solo permite confirmar la pestaña y el distintivo |
-| Puntos | Ausente | Faltan reglas de obtención, registro de movimientos y contador. No es suficiente mostrar un número fijo |
-| Valorar la noche | Ausente | Faltan formulario, almacenamiento, permisos, comprobación de visita y agregados |
-| Perfil con contacto, edad, procedencia y contadores | Parcial | Hay nombre, gustos, cuenta y acceso al panel. Faltan ciudad/procedencia, resumen de contacto y edad, y contadores. Planes y check-ins ya tienen datos de los que derivarlos |
-| «Tu opinión sobre el piloto» | Ausente | Falta formulario y persistencia del feedback, con confirmación de envío |
-| Registro con email o teléfono | Parcial | Email implementado; teléfono no. El piloto no demuestra que verifique ninguno de los dos |
-| Acceso sin depender del correo | Preparado en este cambio | «Probar sin correo» usa usuarios anónimos de Supabase; debe habilitarse Anonymous Sign-ins en el proyecto alojado |
+## Diferencias y trabajo posterior
 
-Evidencia principal: `app/src/app/tonight-view.tsx`, `app/src/app/mapa/map-view.tsx`,
-`app/src/components/tonight/minimap.tsx`, `app/src/components/tonight/venue-card.tsx`,
-`app/src/lib/tonight/recommend.ts`, `app/src/app/perfil/page.tsx`,
-`app/src/app/perfil/gustos/preferences-form.tsx`, `app/src/app/planes/page.tsx`,
-`app/src/components/tab-bar.tsx` y `app/supabase/migrations/`.
+- La marca sigue siendo Hunter. «Rumbo» solo es la referencia visual recibida.
+- El piloto dice que guarda todo en el navegador; Hunter guarda datos en Supabase.
+  No debe copiarse ese aviso porque en Hunter sería falso.
+- El mapa sigue siendo esquemático. No se han añadido un callejero real, teselas,
+  navegación por calles ni los barrios ilustrados de la referencia.
+- Amigos es una primera versión de solicitudes y relaciones. No incluye chat,
+  sincronización de contactos, notificaciones, ni ver los planes de otra persona.
+- La portada no muestra aún chips de filtros activos ni fecha; los filtros están
+  en un desplegable accesible. Los puntos aparecen en el perfil, no en una cabecera global.
+- Las recomendaciones siguen usando los gustos; la media de valoraciones está en
+  la ficha del local, pero todavía no influye en el orden de «También te puede gustar».
+- La procedencia se recoge en el perfil, no en el formulario inicial. El acceso por
+  teléfono y la recuperación de cuentas de invitado no están implementados.
+- Los datos de ejemplo de `supabase/seed.sql` son solo locales. Aplicar migraciones
+  en Supabase alojado no carga locales ni ofertas de demostración.
 
-## Orden propuesto para las pruebas
+## Activación
 
-1. Activar el acceso de invitado, desplegar la corrección del login y probar el alta
-   con un navegador nuevo. Para correo abierto a destinatarios externos sigue haciendo
-   falta un servicio de envío o un proveedor de acceso alternativo.
-2. Comprobar que la base alojada tiene locales de prueba y horarios. Aplicar migraciones
-   no carga `supabase/seed.sql`; ese archivo está marcado para desarrollo local.
-   No ejecutar `db:reset` en remoto ni cargar el seed local en producción.
-3. Añadir feedback del piloto, porcentaje de encaje y tarjeta de local sobre el mapa.
-   Son mejoras útiles para validar la propuesta sin depender de construir la red social.
-4. Añadir valoraciones verificadas; después usarlas en las recomendaciones.
-5. Definir las reglas de Amigos y puntos antes de crear sus tablas y pantallas.
+La nueva migración es `app/supabase/migrations/20261110170000_pilot_social.sql`.
+Debe aplicarse al proyecto alojado antes de publicar las pantallas dependientes.
+Añade tablas y funciones; no reinicia ni borra la base de datos.
 
-Esta revisión no implementa las funciones pendientes ni verifica sus pantallas en producción.
+Desde `app`, con el proyecto enlazado y la sesión de Supabase válida:
+
+```bash
+npx supabase db push --linked --dry-run
+npx supabase db push --linked
+```
+
+El acceso de invitado requiere además activar **Anonymous Sign-ins** en el panel
+de Supabase. En local se habilita en `supabase/config.toml`; ese archivo no cambia
+por sí solo la configuración de Auth del proyecto alojado.
+
+## Validación
+
+- `npm test`: lógica y validación de respuestas.
+- `npx playwright test --config playwright.auth.config.ts`: navegador móvil,
+  SDK y cookies reales contra un proveedor HTTP simulado. Incluye filtros, mapa,
+  perfil, feedback, solicitudes y valoraciones; no envía correos reales.
+- `npx supabase test db`: suite pgTAP sobre PostgreSQL local, incluyendo permisos,
+  aislamiento entre usuarios, límites, visitas verificadas y puntos no duplicados.
+- `npm run lint`, `npm run typecheck`, `npm run build`.
+
+Las pruebas locales no demuestran que la migración o la configuración de Auth
+ya estén aplicadas en el proyecto alojado, ni que Vercel haya terminado de desplegar.

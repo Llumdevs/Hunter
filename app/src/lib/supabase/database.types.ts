@@ -2,7 +2,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-  
+
   "public": {
           Tables: {
             "checkins": {
@@ -43,7 +43,33 @@ isOneToOne: false
                     "id"?: string,"name"?: string,"timezone"?: string
                   }
                   Relationships: [
-                    
+
+                  ]
+                },"friend_requests": {
+                  Row: {
+                    "created_at": string,"id": string,"recipient_id": string,"requester_id": string,"status": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"recipient_id": string,"requester_id": string,"status"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"recipient_id"?: string,"requester_id"?: string,"status"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "friend_requests_recipient_id_fkey"
+      columns: ["recipient_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "friend_requests_requester_id_fkey"
+      columns: ["requester_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"offers": {
                   Row: {
@@ -97,7 +123,21 @@ isOneToOne: false
                     "created_at"?: string,"id"?: string,"kind"?: string,"name"?: string
                   }
                   Relationships: [
-                    
+
+                  ]
+                },"pilot_feedback": {
+                  Row: {
+                    "created_at": string,"id": string,"message": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"message": string,"user_id"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"message"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+
                   ]
                 },"place_opening_hours": {
                   Row: {
@@ -159,6 +199,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"place_reviews": {
+                  Row: {
+                    "checkin_id": string,"comment": string,"created_at": string,"place_id": string,"rating": number,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "checkin_id": string,"comment"?: string,"created_at"?: string,"place_id": string,"rating": number,"user_id"?: string
+                  }
+                  Update: {
+                    "checkin_id"?: string,"comment"?: string,"created_at"?: string,"place_id"?: string,"rating"?: number,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "place_reviews_checkin_id_fkey"
+      columns: ["checkin_id"]
+isOneToOne: true
+      referencedRelation: "checkins"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "place_reviews_place_id_fkey"
+      columns: ["place_id"]
+isOneToOne: false
+      referencedRelation: "places"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"places": {
                   Row: {
                     "address": string,"base_age_band": string | null,"city_id": string,"created_at": string,"id": string,"is_active": boolean,"is_founder": boolean,"kind": string,"location": unknown,"name": string,"organizer_id": string,"price_level": string,"slug": string,"zone": string
@@ -187,17 +253,17 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "birthdate": string,"created_at": string,"display_name": string,"id": string,"locale": string
+                    "birthdate": string,"created_at": string,"display_name": string,"friend_code": string,"home_city": string | null,"id": string,"locale": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "birthdate": string,"created_at"?: string,"display_name": string,"id": string,"locale"?: string
+                    "birthdate": string,"created_at"?: string,"display_name": string,"friend_code"?: string,"home_city"?: string | null,"id": string,"locale"?: string
                   }
                   Update: {
-                    "birthdate"?: string,"created_at"?: string,"display_name"?: string,"id"?: string,"locale"?: string
+                    "birthdate"?: string,"created_at"?: string,"display_name"?: string,"friend_code"?: string,"home_city"?: string | null,"id"?: string,"locale"?: string
                   }
                   Relationships: [
-                    
+
                   ]
                 },"redemptions": {
                   Row: {
@@ -257,7 +323,7 @@ isOneToOne: false
                     "age_bands"?: (string)[],"music"?: (string)[],"price"?: (string)[],"updated_at"?: string,"user_id"?: string,"vibe"?: (string)[]
                   }
                   Relationships: [
-                    
+
                   ]
                 }
           }
@@ -274,6 +340,15 @@ isOneToOne: false
 "delete_my_account":
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
+"my_friends":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"my_pilot_profile":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"my_reviewable_visits":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
 "place_nightly_stats":
 { Args: { "p_from": string,"p_place_id": string,"p_to": string }; Returns: {
               "billable": number,"checkins": number,"night_date": string,"redemptions": number,"signups": number
@@ -284,11 +359,26 @@ isOneToOne: false
               "screen_secret": string,"static_token": string
             }[]
                            },
+"place_rating_summary":
+{ Args: { "p_place": string }; Returns: Json
+                           },
 "recommendation_settings":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
 "redeem":
 { Args: { "p_checkin_id": string,"p_offer_id": string }; Returns: Json
+                           },
+"request_friend":
+{ Args: { "p_code": string }; Returns: Json
+                           },
+"respond_friend":
+{ Args: { "p_accept": boolean,"p_request": string }; Returns: Json
+                           },
+"review_visit":
+{ Args: { "p_checkin": string,"p_comment"?: string,"p_rating": number }; Returns: Json
+                           },
+"send_pilot_feedback":
+{ Args: { "p_message": string }; Returns: Json
                            },
 "sign_up":
 { Args: { "p_place_id": string }; Returns: Json
@@ -297,6 +387,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "age_band": string,"age_source": string,"closes_at": string,"cover_path": string,"id": string,"kind": string,"lat": number,"lng": number,"music": string,"name": string,"opens_at": string,"price_level": string,"signups_any": boolean,"signups_visible": number,"vibe": string,"zone": string
             }[]
+                           },
+"update_my_city":
+{ Args: { "p_city": string }; Returns: Json
                            }
           }
           Enums: {
@@ -416,7 +509,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            
+
           }
         }
 } as const

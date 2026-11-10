@@ -1,17 +1,23 @@
-import { ChevronRight, ShieldCheck, SlidersHorizontal, Store } from "lucide-react";
+import { ChevronRight, ShieldCheck, SlidersHorizontal, Store, Star, Users } from "lucide-react";
 import Link from "next/link";
 import { AccountActions } from "./account-actions";
 import { TabBar } from "@/components/tab-bar";
 import { requireUserWithProfile } from "@/lib/auth/session";
+import { pilotProfileSchema } from "@/lib/pilot/data";
+import { PilotProfileDetails } from "./pilot-profile";
 
 export default async function ProfilePage() {
   const { supabase, userId } = await requireUserWithProfile("/perfil");
-  const [{ data: profile }, { data: memberships }] = await Promise.all([
+  const [{ data: profile }, { data: memberships }, { data: pilotData }] = await Promise.all([
     supabase.from("profiles").select("display_name").eq("id", userId).single(),
     supabase.from("organizer_members").select("organizer_id").limit(1),
+    supabase.rpc("my_pilot_profile"),
   ]);
+  const pilot = pilotProfileSchema.safeParse(pilotData);
   const links = [
     { href: "/perfil/gustos", label: "Mis gustos", Icon: SlidersHorizontal },
+    { href: "/amigos", label: "Amigos y solicitudes", Icon: Users },
+    { href: "/valoraciones", label: "Valorar mis visitas", Icon: Star },
     ...((memberships ?? []).length ? [{ href: "/panel", label: "Panel de mi local", Icon: Store }] : []),
     { href: "/privacidad", label: "Privacidad", Icon: ShieldCheck },
   ];
@@ -33,6 +39,7 @@ export default async function ProfilePage() {
             </Link>
           ))}
         </nav>
+        {pilot.success ? <PilotProfileDetails profile={pilot.data} /> : <p role="alert" className="text-sm text-muted">No hemos podido cargar el resumen del piloto. Inténtalo de nuevo más tarde.</p>}
         <AccountActions />
       </section>
       <TabBar />

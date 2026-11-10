@@ -1,5 +1,21 @@
 # Hunter · app
 
+## Funciones del piloto
+
+La migración `20261110170000_pilot_social.sql` añade procedencia privada,
+feedback, solicitudes de amistad por código y valoraciones de visitas verificadas.
+Aplicarla con `npx supabase db push --linked` antes de desplegar estas pantallas.
+No usar `db:reset` en el proyecto alojado.
+
+Los puntos se calculan en servidor: 10 por check-in verificado no marcado y 5 por
+valoración, una por visita. Las amistades solo comparten nombre y estado; no
+comparten ubicación, correo ni planes. Las medias de los locales se muestran
+desde tres valoraciones; los comentarios no son públicos.
+
+La portada permite filtrar temporalmente música, ambiente y presupuesto sin
+cambiar los gustos guardados. El mapa permite seleccionar un local para ver su
+oferta y abrir la ficha. Comparación y límites: [`../docs/revision-piloto.md`](../docs/revision-piloto.md).
+
 ## Acceso del piloto alojado
 
 - **Probar sin correo** crea una sesión de invitado real de Supabase. Activar

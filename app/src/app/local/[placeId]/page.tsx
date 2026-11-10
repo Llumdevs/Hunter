@@ -8,6 +8,8 @@ import { AGE_BANDS, labelFor, MUSIC, VIBES } from "@/lib/tonight/catalog";
 import { crowdLabel } from "@/lib/tonight/format";
 import { loadTonight } from "@/lib/tonight/load";
 import { tonightDate } from "@/lib/tonight/night";
+import { ratingSummarySchema } from "@/lib/pilot/data";
+import Link from "next/link";
 
 const TILE = "rounded-[var(--radius-tile)] p-3 text-center text-day-ink";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -21,12 +23,14 @@ export default async function PlacePage({ params }: { params: Promise<{ placeId:
   if (!place) return <Notice title="Este local no abre esta noche">Vuelve a mirar mañana.</Notice>;
 
   const night = tonightDate();
-  const [{ data: offers }, { data: signup }] = await Promise.all([
+  const [{ data: offers }, { data: signup }, { data: ratings }] = await Promise.all([
     supabase.from("offers").select("id, title, description, includes_alcohol, days_of_week").eq("place_id", placeId).eq("is_active", true),
     userId
       ? supabase.from("signups").select("id").eq("place_id", placeId).eq("night_date", night).is("cancelled_at", null).maybeSingle()
       : Promise.resolve({ data: null }),
+    userId ? supabase.rpc("place_rating_summary", { p_place: placeId }) : Promise.resolve({ data: null }),
   ]);
+  const rating = ratingSummarySchema.safeParse(ratings);
   const tonightOffers = offersForNight(
     (offers ?? []).map((o) => ({ id: o.id, title: o.title, description: o.description, includesAlcohol: o.includes_alcohol, daysOfWeek: o.days_of_week })),
     night,
@@ -55,6 +59,11 @@ export default async function PlacePage({ params }: { params: Promise<{ placeId:
         </div>
         {place.age_source === "venue" && place.age_band && <p className="text-center text-xs text-muted">Edad del público según el local</p>}
         {crowd && <p className="glass rounded-2xl px-4 py-3 text-center text-sm font-semibold">{crowd} esta noche</p>}
+        {rating.success && <div className="glass flex flex-col gap-2 rounded-2xl p-4 text-sm">
+          <h2 className="font-bold">Valoraciones de visitas verificadas</h2>
+          <p className="text-muted">{rating.data.average !== null ? `${rating.data.average} de 5 ★ · ${rating.data.count} valoraciones` : "Aún no hay suficientes valoraciones para mostrar una media (mínimo 3)."}</p>
+          <Link href="/valoraciones" className="text-orange-soft underline">Valorar mis visitas</Link>
+        </div>}
         {tonightOffers.map((offer) => (
           <article key={offer.id} className="rounded-[22px] border border-dashed border-orange-soft/70 bg-gradient-to-br from-orange/20 to-rose/10 p-4">
             <p className="text-[11px] font-bold tracking-wider text-orange-soft uppercase">Oferta por apuntarte</p>
