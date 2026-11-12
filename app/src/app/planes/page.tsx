@@ -1,33 +1,25 @@
-import { CheckCircle2, ScanLine, Ticket } from "lucide-react";
+import { CheckCircle2, ScanLine, MapPin } from "lucide-react";
 import Link from "next/link";
 import { CancelSignupButton } from "./cancel-signup-button";
 import { AppShell } from "@/components/app-shell";
 import { requireUserWithProfile } from "@/lib/auth/session";
 import { tonightDate } from "@/lib/tonight/night";
-import { DemoPlans } from "@/components/demo/demo-panels";
+import { ShareButton } from "@/components/share-button";
+import { PlansOverview } from "./plans-overview";
 
 export default async function PlansPage() {
   const { supabase } = await requireUserWithProfile("/planes");
   const night = tonightDate();
-  const [{ data: signups }, { data: checkins }] = await Promise.all([
-    supabase.from("signups").select("place_id, places(name, zone)").eq("night_date", night).is("cancelled_at", null),
+  const [{ data: signups, error: signupsError }, { data: checkins, error: checkinsError }] = await Promise.all([
+    supabase.from("signups").select("place_id, places(name, zone, address, cities(name))").eq("night_date", night).is("cancelled_at", null),
     supabase.from("checkins").select("place_id, redemptions(id)").eq("night_date", night),
   ]);
   const checkinByPlace = new Map((checkins ?? []).map((c) => [c.place_id, c]));
 
   return (
     <AppShell>
-      <section className="flex flex-col gap-5">
-        <h1 className="text-[28px] leading-tight font-extrabold uppercase">Mis planes<br /><span className="text-muted">esta noche</span></h1>
-        <DemoPlans />
-        <h2 className="text-lg font-bold">Tus prelistas reales</h2>
-        {(signups ?? []).length === 0 && (
-          <div className="glass flex flex-col items-center gap-3 rounded-[var(--radius-card)] p-6 text-center">
-            <Ticket aria-hidden className="h-8 w-8 text-violet" />
-            <p className="text-muted">Aún no te has apuntado a ningún sitio esta noche.</p>
-            <Link href="/" className="font-bold text-violet-soft underline">Ver qué hay esta noche</Link>
-          </div>
-        )}
+      <PlansOverview count={(signups ?? []).length} failed={Boolean(signupsError || checkinsError)}>
+        <h2 className="text-lg font-bold">Tus prelistas</h2>
         {(signups ?? []).map((signup) => {
           const checkin = checkinByPlace.get(signup.place_id);
           const redemption = checkin?.redemptions;
@@ -41,6 +33,10 @@ export default async function PlansPage() {
                 <span className={`rounded-full px-3 py-1 text-xs font-bold ${checkin ? "bg-lime text-night-950" : "bg-white/10"}`}>
                   {redemption ? "Canjeado" : checkin ? "Check-in hecho" : "Apuntado"}
                 </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-3">
+                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([signup.places?.address || signup.places?.name, signup.places?.zone, signup.places?.cities?.name || "Valencia"].filter(Boolean).join(", "))}`} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/15 text-xs font-semibold text-violet-soft"><MapPin aria-hidden className="h-4 w-4" />Cómo llegar</a>
+                <ShareButton title={signup.places?.name || "Plan en Hunter"} text="¿Te apuntas? Descubre este local en Hunter." path={`/local/${signup.place_id}`} label="Compartir plan" />
               </div>
               {redemption ? (
                 <Link href={`/canje/${redemption.id}`} className="flex items-center gap-2 font-bold text-lime">
@@ -57,8 +53,7 @@ export default async function PlansPage() {
             </article>
           );
         })}
-      </section>
-
+      </PlansOverview>
     </AppShell>
   );
 }

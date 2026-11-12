@@ -17,7 +17,7 @@ const LINKS = [
   { href: "/privacidad", label: "Privacidad", Icon: ShieldCheck },
 ];
 
-export function SideMenu() {
+export function SideMenu({ canManageVenue = false }: { canManageVenue?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const previousOverflow = useRef("");
@@ -58,7 +58,7 @@ export function SideMenu() {
       <div className="flex h-full flex-col gap-6 overflow-y-auto p-6">
         <div className="flex items-center justify-between"><h2 id="side-menu-title" className="text-xl font-extrabold">Tu Hunter</h2><button type="button" onClick={close} aria-label="Cerrar menú" className="grid h-11 w-11 place-items-center rounded-full border border-white/15"><X aria-hidden className="h-5 w-5" /></button></div>
         <nav aria-label="Opciones de cuenta" className="flex flex-col gap-2">
-          {LINKS.map(({ href, label, Icon }) => <Link key={href} href={href} onClick={close} className="glass flex min-h-14 items-center gap-3 rounded-2xl px-4"><Icon aria-hidden className="h-5 w-5 text-violet-soft" />{label}</Link>)}
+          {LINKS.filter((link) => link.href !== "/panel" || canManageVenue).map(({ href, label, Icon }) => <Link key={href} href={href} onClick={close} className="glass flex min-h-14 items-center gap-3 rounded-2xl px-4"><Icon aria-hidden className="h-5 w-5 text-violet-soft" />{label}</Link>)}
         </nav>
         <div className="mt-auto flex flex-col gap-3 border-t border-white/15 pt-5">
           <p className="text-xs text-muted">Si estás probando como invitado, cerrar sesión te hará perder el acceso a esa cuenta.</p>

@@ -7,6 +7,9 @@ import { tonightDate } from "@/lib/tonight/night";
 import type { Score } from "@/lib/tonight/recommend";
 import type { TonightPlaceRow } from "@/lib/tonight/load";
 import { VenueResult } from "@/components/tonight/venue-result";
+import { ShareButton } from "@/components/share-button";
+import { PlacePhoto } from "@/components/place-photo";
+import { MapPin } from "lucide-react";
 import { EventPoster } from "./event-poster";
 import { demoPoints } from "@/lib/demo/state";
 
@@ -43,22 +46,23 @@ export function DemoPlans() {
   const { state, update, ready } = useDemo();
   if (!ready || state.plans.length === 0) return null;
   return <section aria-label="Planes demo" className="flex flex-col gap-3">
-    <h2 className="text-lg font-bold">Tus planes simulados</h2><DemoBanner />
+    <h2 className="text-lg font-bold">Planes de prueba</h2>
     {state.plans.map((plan) => {
       const place = DEMO_PLACES.find((item) => item.id === plan.placeId)!;
       const event = DEMO_EVENTS.find((item) => item.placeId === plan.placeId)!;
-      return <article key={plan.placeId} className="glass flex flex-col gap-3 rounded-3xl p-4">
-        <Link href={`/local/${plan.placeId}`} className="font-bold">{event.title}</Link>
-        <p className="text-sm text-muted">{place.name} · {event.time} · Demo</p>
+      return <article key={plan.placeId} className="flex flex-col gap-3 rounded-[28px] border border-white/10 bg-white/[.025] p-4">
+        <div className="flex items-center gap-3"><PlacePhoto path={null} alt="" demo variant={place.music === "jazz" ? "live" : place.music === "indie" ? "terrace" : place.music === "pop" ? "electric" : "night"} className="h-24 w-20 flex-none rounded-2xl" /><div><span className="text-[10px] font-semibold text-violet-soft">{event.time} / Demo</span><Link href={`/local/${plan.placeId}`} className="mt-2 block text-lg leading-tight font-bold">{event.title}</Link><p className="mt-1 text-[11px] text-muted">{place.name} · {place.zone}</p></div></div>
+        <div className="grid grid-cols-2 gap-2"><a href={`https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`} target="_blank" rel="noopener noreferrer" aria-label="Cómo llegar (ubicación demo)" className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/15 text-xs font-semibold text-violet-soft"><MapPin aria-hidden className="h-4 w-4" />Cómo llegar</a><ShareButton title={event.title} text={`Plan de prueba en Hunter · ${event.time}. Evento simulado, no una reserva real.`} path={`/local/${plan.placeId}`} label="Compartir plan" /></div>
         {plan.checkedIn ? <>
           <p className="font-semibold text-lime">Check-in simulado · sin puntos</p>
           {plan.rating === null ? <label className="text-sm">Valorar la visita demo<select aria-label={`Valorar ${event.title}`} defaultValue="" onChange={(e) => { const rating = Number(e.target.value); update((current) => ({ ...current, plans: current.plans.map((p) => p.placeId === plan.placeId ? { ...p, rating } : p) })); }} className="mt-2 w-full rounded-xl border border-white/20 bg-night-900 p-3"><option value="" disabled>Elige una puntuación</option>{[5, 4, 3, 2, 1].map((rating) => <option key={rating} value={rating}>{rating} de 5 ★</option>)}</select></label>
             : <p className="text-sm text-lime">Tu valoración demo: {plan.rating} de 5 ★</p>}
         </> : <button type="button" onClick={() => update((current) => ({ ...current, plans: current.plans.map((p) => p.placeId === plan.placeId ? { ...p, checkedIn: true } : p) }))} className="min-h-11 rounded-full bg-lime px-4 font-bold text-night-950">Simular check-in</button>}
-        {plan.purchaseValidated ? <p className="text-lime">Compra simulada · +10 puntos demo</p> : <button type="button" onClick={() => update((current) => ({ ...current, plans: current.plans.map((p) => p.placeId === plan.placeId ? { ...p, purchaseValidated: true } : p) }))} className="min-h-11 rounded-full bg-violet p-3 font-bold">Simular compra validada</button>}
+        {plan.purchaseValidated ? <p className="text-lime">Compra simulada · +10 puntos demo</p> : <button type="button" onClick={() => update((current) => ({ ...current, plans: current.plans.map((p) => p.placeId === plan.placeId ? { ...p, purchaseValidated: true } : p) }))} className="min-h-11 rounded-full bg-violet p-3 font-bold text-night-950">Simular compra validada</button>}
         <button type="button" onClick={() => update((current) => ({ ...current, plans: current.plans.filter((p) => p.placeId !== plan.placeId) }))} className="min-h-11 text-sm text-muted underline">Quitar plan demo</button>
       </article>;
     })}
+    <DemoBanner />
   </section>;
 }
 

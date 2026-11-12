@@ -20,6 +20,7 @@ let purchaseRecorded = false;
 const purchaseToken = "ab".repeat(32);
 const purchaseId = "71000000-0000-4000-8000-000000000001";
 const rewardRules = { purchase_points: 10, daily_purchase_limit: 3, referral_points: 20, monthly_referral_limit: 5, token_ttl_seconds: 300, timezone: "Europe/Madrid", prize: { title: "Dos entradas · Ejemplo", description: "Premio ficticio, sin patrocinador." } };
+let mockSignups: { place_id: string; places: { name: string; zone: string; address: string; cities: { name: string } } }[] = [];
 let emptyPlaces = false;
 let demoVenueCreated = false;
 let venueAdmin = false;
@@ -81,6 +82,10 @@ test.beforeAll(async () => {
       res.end(JSON.stringify(user));
     } else if (url.pathname === "/rest/v1/profiles") {
       res.end(JSON.stringify(existingProfile ? [{ id: user.id, display_name: "Prueba" }] : []));
+    } else if (url.pathname === "/rest/v1/signups") {
+      res.end(JSON.stringify(mockSignups));
+    } else if (url.pathname === "/rest/v1/checkins") {
+      res.end("[]");
     } else if (url.pathname === "/rest/v1/user_preferences") {
       res.end(JSON.stringify([{ music: ["house"], vibe: ["bailar"], price: [], age_bands: [] }]));
     } else if (url.pathname === "/rest/v1/rpc/tonight_places") {
@@ -172,7 +177,7 @@ test.beforeAll(async () => {
 test.afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
 test.beforeEach(async ({ context }) => {
   challenge = ""; callback = ""; existingProfile = false; deliveryError = false; guestDisabled = false; guestSignups = 0; mockCity = null; lastFeedback = ""; mockRating = null; referralClaimed = false; rankAlias = null; rankOptin = false; purchaseCancelled = false; purchaseRecorded = false; emptyPlaces = false;
-  demoVenueCreated = false; venueAdmin = false; venueApplications = [];
+  mockSignups = []; demoVenueCreated = false; venueAdmin = false; venueApplications = [];
   demoVenueOffers = [{ id: "70000000-0000-4000-8000-000000000003", place_id: demoVenueId, title: "Tapa de bienvenida · Demo", description: "Oferta de ejemplo", includes_alcohol: false, days_of_week: [1, 2, 3, 4, 5, 6, 7], valid_until_time: null, is_active: true }];
   // Leaflet es real; solo se aíslan las imágenes externas del callejero.
   await context.route("https://tile.openstreetmap.org/**", (route) => route.fulfill({ contentType: "image/png", body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64") }));
@@ -281,7 +286,7 @@ test("el mapa permite seleccionar un local, ver su oferta y cerrar la tarjeta", 
   const card = page.getByRole("region", { name: "Local seleccionado" });
   await expect(card.getByRole("heading", { name: "Jazz de prueba" })).toBeVisible();
   await expect(card.getByText("Oferta de prueba")).toBeVisible();
-  await expect(card.getByRole("link", { name: "Ver el local" })).toHaveAttribute("href", "/local/d0000000-0000-4000-8000-000000000002");
+  await expect(card.getByRole("link", { name: "Ver el local" })).toHaveAttribute("href", `/local/${testPlaces[1].id}`);
   await card.getByRole("link", { name: "Ver el local" }).click({ trial: true });
   await page.screenshot({ path: test.info().outputPath("mapa-movil.png") });
   await card.getByRole("button", { name: "Cerrar local seleccionado" }).click();
@@ -384,6 +389,7 @@ test("con base vacía hay eventos demo, planes persistentes y check-in simulado"
   await plans.getByRole("button", { name: "Simular check-in" }).click();
   await plans.getByLabel("Valorar House en Ruzafa").selectOption("4");
   await expect(plans.getByText(/Tu valoración demo: 4/)).toBeVisible();
+  await page.screenshot({ path: test.info().outputPath("mis-planes-demo.png"), style: "nextjs-portal { display: none !important; }" });
   await plans.getByRole("button", { name: "Simular compra validada" }).click();
   await page.goto("/demo");
   await expect(page.getByText(/Puntos demo: 10/)).toBeVisible();
@@ -395,7 +401,7 @@ test("cerrar sesión desde el menú vuelve a la portada", async ({ page }) => {
   await enterPilot(page, "/perfil");
   await page.getByRole("button", { name: "Abrir menú" }).click();
   await page.getByRole("button", { name: "Salir", exact: true }).click();
-  await expect(page.getByRole("link", { name: "Empezar", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Empezar", exact: true })).toBeVisible();
 });
 
 test("si el callejero falla sigue disponible un mapa sin calles con selección", async ({ page, context }) => {
@@ -587,7 +593,7 @@ test("la introducción permite cambiar de paso y continúa al acceso", async ({ 
   await expect(page.getByRole("tabpanel")).toContainText("Encuentra tu frecuencia");
   await page.locator("img").evaluateAll(async (images) => { await Promise.all(images.map((image) => (image as HTMLImageElement).decode().catch(() => {}))); });
   await page.screenshot({ path: test.info().outputPath("portada-editorial.png"), style: "nextjs-portal { display: none !important; }" });
-  await page.getByRole("link", { name: "Empezar", exact: true }).click();
+  await page.getByRole("button", { name: "Empezar", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Entra en Hunter" })).toBeVisible();
 });
 
@@ -624,4 +630,88 @@ test("el mapa muestra resultados con fotos y ordena por cercanía", async ({ pag
   await results.locator("img").evaluateAll(async (images) => { await Promise.all(images.map((image) => (image as HTMLImageElement).decode().catch(() => {}))); });
   await results.scrollIntoViewIfNeeded();
   await page.screenshot({ path: test.info().outputPath("mapa-resultados.png"), style: "nextjs-portal { display: none !important; }" });
+});
+
+test("la flecha de empezar se arrastra, vuelve si se suelta antes y abre el acceso al completar", async ({ page }) => {
+  await page.goto("/");
+  const start = page.getByRole("button", { name: "Empezar", exact: true });
+  await start.scrollIntoViewIfNeeded();
+  const knob = page.getByTestId("start-knob");
+  const initial = (await knob.boundingBox())!;
+  const track = (await start.boundingBox())!;
+  await page.mouse.move(initial.x + initial.width / 2, initial.y + initial.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(initial.x + initial.width / 2 + 65, initial.y + initial.height / 2, { steps: 8 });
+  expect((await knob.boundingBox())!.x).toBeGreaterThan(initial.x + 40);
+  await page.mouse.up();
+  await expect(page).toHaveURL("http://127.0.0.1:3100/");
+  await expect.poll(async () => (await knob.boundingBox())!.x).toBeCloseTo(initial.x, 0);
+  await page.mouse.move(initial.x + initial.width / 2, initial.y + initial.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(track.x + track.width - 14, initial.y + initial.height / 2, { steps: 12 });
+  await page.mouse.up();
+  await expect(page.getByRole("heading", { name: "Entra en Hunter" })).toBeVisible();
+});
+
+test("el menú normal oculta locales y una cuenta con local conserva el acceso", async ({ page }) => {
+  await enterPilot(page, "/");
+  await page.getByRole("button", { name: "Abrir menú" }).click();
+  await expect(page.getByRole("dialog").getByRole("link", { name: "Panel de locales" })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  demoVenueCreated = true;
+  await page.reload();
+  await page.getByRole("button", { name: "Abrir menú" }).click();
+  await expect(page.getByRole("dialog").getByRole("link", { name: "Panel de locales" })).toBeVisible();
+});
+
+test("compartir un local abre el compartir nativo sin incluir parámetros privados", async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, "share", { configurable: true, value: async (payload: ShareData) => Object.defineProperty(window, "hunterShared", { configurable: true, value: payload }) }));
+  await enterPilot(page, "/local/d0000000-0000-4000-8000-000000000001?debug=test#preview");
+  await page.getByRole("button", { name: "Compartir local", exact: true }).click();
+  const shared = await page.evaluate(() => (window as typeof window & { hunterShared: ShareData }).hunterShared);
+  expect(shared.url).toBe("http://127.0.0.1:3100/local/d0000000-0000-4000-8000-000000000001");
+  expect(shared.text).toContain("simulado");
+});
+
+test("sin compartir nativo copia la invitación y cancelar el compartir no copia nada", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", { configurable: true, value: undefined });
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async (text: string) => Object.defineProperty(window, "hunterCopied", { configurable: true, value: text }) } });
+  });
+  await enterPilot(page, "/invitaciones");
+  await page.getByRole("button", { name: "Compartir invitación" }).click();
+  await expect(page.getByRole("status")).toContainText("Enlace copiado");
+  expect(await page.evaluate(() => (window as typeof window & { hunterCopied: string }).hunterCopied)).toContain("0123456789abcdef");
+  await page.evaluate(() => {
+    Object.defineProperty(window, "hunterCopied", { configurable: true, value: "" });
+    Object.defineProperty(navigator, "share", { configurable: true, value: async () => { throw new DOMException("Cancelled", "AbortError"); } });
+  });
+  await page.getByRole("button", { name: "Compartir invitación" }).click();
+  await expect(page.getByRole("status")).toHaveCount(0);
+  expect(await page.evaluate(() => (window as typeof window & { hunterCopied: string }).hunterCopied)).toBe("");
+});
+
+test("Mis planes reúne cómo llegar, compartir y QR sin un bloque vacío de prelistas", async ({ page }) => {
+  mockSignups = [{ place_id: testPlaces[0].id, places: { name: "Sala de prueba", zone: "Ruzafa", address: "Calle de prueba 1", cities: { name: "Valencia" } } }];
+  await enterPilot(page, "/planes");
+  await expect(page.getByRole("heading", { name: "Mis planes", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Cómo llegar", exact: true })).toHaveAttribute("href", /Calle%20de%20prueba%201/);
+  await expect(page.getByRole("button", { name: "Compartir plan" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Mi QR de compra/ }).first()).toBeVisible();
+  await page.screenshot({ path: test.info().outputPath("mis-planes.png"), style: "nextjs-portal { display: none !important; }" });
+  mockSignups = [];
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Todavía no tienes planes" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Tus prelistas", exact: true })).toHaveCount(0);
+});
+
+test("si tampoco se permite copiar, compartir ofrece texto seleccionable", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", { configurable: true, value: undefined });
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async () => { throw new DOMException("Denied", "NotAllowedError"); } } });
+  });
+  await enterPilot(page, "/invitaciones");
+  await page.getByRole("button", { name: "Compartir invitación" }).click();
+  await expect(page.getByLabel("Texto para compartir")).toHaveValue(/0123456789abcdef/);
+  await expect(page.getByLabel("Texto para compartir")).toHaveValue(/http:\/\/127.0.0.1:3100\//);
 });

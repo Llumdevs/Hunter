@@ -40,6 +40,6 @@ export function CustomerPurchases({ venues, purchases }: { venues: PurchaseVenue
     {error && <ErrorText>{error}</ErrorText>}
     <button type="button" onClick={() => router.refresh()} className="min-h-11 text-left font-bold text-violet-soft">Actualizar mis compras</button>
     <section className="flex flex-col gap-3"><h2 className="text-xl font-bold">Compras registradas</h2>{purchases.length ? purchases.map((purchase) => <article key={purchase.id} className="glass flex flex-col gap-2 rounded-3xl p-4"><h3 className="font-bold">{purchase.place_name}</h3><p className="text-xs text-muted">{new Date(purchase.validated_at).toLocaleString("es-ES", { timeZone: "Europe/Madrid" })}</p><p className="text-sm">{purchase.is_demo ? "Demo · " : ""}{purchase.cancelled ? "Anulada · sin puntos" : `${purchase.points} puntos`}</p></article>) : <p className="text-sm text-muted">Aún no tienes compras validadas por el personal.</p>}</section>
-    <Link href="/ranking" className="min-h-11 font-bold text-violet-soft underline">Ver mis puntos del mes</Link><Link href="/panel" className="min-h-11 text-sm text-muted underline">Abrir panel del local para probar la validación</Link><RewardsRules />
+    <Link href="/ranking" className="min-h-11 font-bold text-violet-soft underline">Ver mis puntos del mes</Link>{venues.some((venue) => venue.is_demo) && <Link href="/panel" className="min-h-11 text-sm text-muted underline">Abrir panel del local para probar la validación</Link>}<RewardsRules />
   </section>;
 }
