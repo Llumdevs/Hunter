@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { friendsSchema, pilotProfileSchema, pilotResult, visitsSchema } from "./data";
+import { pilotProfileSchema, pilotResult, visitsSchema } from "./data";
 
 describe("respuestas del piloto", () => {
   it("solo confirma éxito cuando el servidor lo confirma", () => {
@@ -14,9 +14,8 @@ describe("respuestas del piloto", () => {
   it("no refleja un mensaje arbitrario del proveedor", () => {
     expect(pilotResult({ ok: false, error: "secret-from-server" }, false)).not.toContain("secret-from-server");
   });
-  it("rechaza datos de perfil incompletos y estados de amistad inesperados", () => {
+  it("rechaza datos de perfil incompletos y valida visitas", () => {
     expect(pilotProfileSchema.safeParse({ name: "Ana" }).success).toBe(false);
-    expect(friendsSchema.safeParse([{ id: "x", name: "Ana", status: "admin", incoming: true }]).success).toBe(false);
     expect(visitsSchema.safeParse([{ id: "x", place_name: "Bar", night_date: "2026-11-10", rating: null }]).success).toBe(true);
   });
 });

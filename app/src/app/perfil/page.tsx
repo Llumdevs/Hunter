@@ -1,4 +1,4 @@
-import { ChevronRight, ShieldCheck, SlidersHorizontal, Store, Star, Users } from "lucide-react";
+import { ChevronRight, ShieldCheck, SlidersHorizontal, Store, Star, Gift, Trophy, QrCode } from "lucide-react";
 import Link from "next/link";
 import { AccountActions } from "./account-actions";
 import { AppShell } from "@/components/app-shell";
@@ -16,7 +16,9 @@ export default async function ProfilePage() {
   const pilot = pilotProfileSchema.safeParse(pilotData);
   const links = [
     { href: "/perfil/gustos", label: "Mis gustos", Icon: SlidersHorizontal },
-    { href: "/amigos", label: "Amigos y solicitudes", Icon: Users },
+    { href: "/invitaciones", label: "Invitaciones por código", Icon: Gift },
+    { href: "/compras", label: "Mi QR de compra", Icon: QrCode },
+    { href: "/ranking", label: "Ranking mensual", Icon: Trophy },
     { href: "/valoraciones", label: "Valorar mis visitas", Icon: Star },
     ...((memberships ?? []).length ? [{ href: "/panel", label: "Panel de mi local", Icon: Store }] : []),
     { href: "/privacidad", label: "Privacidad", Icon: ShieldCheck },

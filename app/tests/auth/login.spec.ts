@@ -12,7 +12,14 @@ let guestSignups = 0;
 let mockCity: string | null = null;
 let lastFeedback = "";
 let mockRating: number | null = null;
-let mockFriends: { id: string; name: string; status: string; incoming: boolean }[] = [];
+let referralClaimed = false;
+let rankAlias: string | null = null;
+let rankOptin = false;
+let purchaseCancelled = false;
+let purchaseRecorded = false;
+const purchaseToken = "ab".repeat(32);
+const purchaseId = "71000000-0000-4000-8000-000000000001";
+const rewardRules = { purchase_points: 10, daily_purchase_limit: 3, referral_points: 20, monthly_referral_limit: 5, token_ttl_seconds: 300, timezone: "Europe/Madrid", prize: { title: "Dos entradas · Ejemplo", description: "Premio ficticio, sin patrocinador." } };
 let emptyPlaces = false;
 let demoVenueCreated = false;
 let venueAdmin = false;
@@ -119,21 +126,35 @@ test.beforeAll(async () => {
         res.end('{"ok":true}');
       }
     } else if (url.pathname === "/rest/v1/rpc/my_pilot_profile") {
-      res.end(JSON.stringify({ name: "Prueba", home_city: mockCity, age: 25, contact: user.email, friend_code: "0123456789abcdef", signups: 2, checkins: 1, reviews: mockRating === null ? 0 : 1, points: mockRating === null ? 10 : 15 }));
+      res.end(JSON.stringify({ name: "Prueba", home_city: mockCity, age: 25, contact: user.email, friend_code: "0123456789abcdef", signups: 2, checkins: 1, reviews: mockRating === null ? 0 : 1, points: 0, legacy_points: mockRating === null ? 10 : 15 }));
     } else if (url.pathname === "/rest/v1/rpc/update_my_city") {
       mockCity = body.p_city;
       res.end('{"ok":true}');
     } else if (url.pathname === "/rest/v1/rpc/send_pilot_feedback") {
       lastFeedback = body.p_message;
       res.end('{"ok":true}');
-    } else if (url.pathname === "/rest/v1/rpc/my_friends") {
-      res.end(JSON.stringify(mockFriends));
-    } else if (url.pathname === "/rest/v1/rpc/request_friend") {
-      mockFriends = [{ id: "60000000-0000-0000-0000-000000000001", name: "Ana", status: "pending", incoming: false }];
-      res.end('{"ok":true}');
-    } else if (url.pathname === "/rest/v1/rpc/respond_friend") {
-      mockFriends = body.p_accept ? mockFriends.map((f) => ({ ...f, status: "accepted" })) : [];
-      res.end('{"ok":true}');
+    } else if (url.pathname === "/rest/v1/rpc/my_referrals") {
+      res.end(JSON.stringify({ code: "0123456789abcdef", has_inviter: referralClaimed, can_claim: !referralClaimed, invited_count: 0, rewarded_count: 0, monthly_referral_points: 0, rules: rewardRules }));
+    } else if (url.pathname === "/rest/v1/rpc/claim_referral") {
+      referralClaimed = true; res.end('{"ok":true}');
+    } else if (url.pathname === "/rest/v1/rpc/monthly_ranking") {
+      res.end(JSON.stringify({ month: body.p_month ?? new Date().toISOString().slice(0,7)+"-01", entries: [], me: { points: 0, purchase_points: 0, referral_points: 0, alias: rankAlias, participating: rankOptin }, rules: rewardRules }));
+    } else if (url.pathname === "/rest/v1/rpc/set_ranking_participation") {
+      rankAlias = body.p_alias; rankOptin = body.p_participating; res.end('{"ok":true}');
+    } else if (url.pathname === "/rest/v1/rpc/purchase_venues") {
+      res.end(JSON.stringify([{ id: demoVenueId, name: "Mi local de prueba · Demo", zone: "Ruzafa", is_demo: true }]));
+    } else if (url.pathname === "/rest/v1/rpc/create_purchase_request") {
+      res.end(JSON.stringify({ ok: true, token: purchaseToken, place_id: demoVenueId, expires_at: new Date(Date.now()+300000).toISOString(), is_demo: true }));
+    } else if (url.pathname === "/rest/v1/rpc/inspect_purchase_request") {
+      res.end(JSON.stringify({ ok: true, expires_at: new Date(Date.now()+300000).toISOString() }));
+    } else if (url.pathname === "/rest/v1/rpc/validate_purchase") {
+      purchaseRecorded = true; res.end(JSON.stringify({ ok: true, purchase_id: purchaseId, purchase_points: 0, is_demo: true, cancelled: purchaseCancelled }));
+    } else if (url.pathname === "/rest/v1/rpc/cancel_validated_purchase") {
+      purchaseCancelled = true; res.end('{"ok":true}');
+    } else if (url.pathname === "/rest/v1/rpc/place_purchase_history") {
+      res.end(JSON.stringify(purchaseRecorded ? [{ id: purchaseId, validated_at: new Date().toISOString(), is_demo: true, cancelled: purchaseCancelled, cancellation_reason: purchaseCancelled ? "Ticket devuelto" : null }] : []));
+    } else if (url.pathname === "/rest/v1/rpc/my_purchase_history") {
+      res.end(JSON.stringify(purchaseRecorded ? [{ id: purchaseId, place_name: "Mi local de prueba · Demo", validated_at: new Date().toISOString(), is_demo: true, cancelled: purchaseCancelled, points: 0 }] : []));
     } else if (url.pathname === "/rest/v1/rpc/my_reviewable_visits") {
       res.end(JSON.stringify([{ id: "50000000-0000-0000-0000-000000000001", place_name: "Sala de prueba", night_date: "2026-11-10", rating: mockRating }]));
     } else if (url.pathname === "/rest/v1/rpc/review_visit") {
@@ -150,7 +171,7 @@ test.beforeAll(async () => {
 
 test.afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
 test.beforeEach(async ({ context }) => {
-  challenge = ""; callback = ""; existingProfile = false; deliveryError = false; guestDisabled = false; guestSignups = 0; mockCity = null; lastFeedback = ""; mockRating = null; mockFriends = []; emptyPlaces = false;
+  challenge = ""; callback = ""; existingProfile = false; deliveryError = false; guestDisabled = false; guestSignups = 0; mockCity = null; lastFeedback = ""; mockRating = null; referralClaimed = false; rankAlias = null; rankOptin = false; purchaseCancelled = false; purchaseRecorded = false; emptyPlaces = false;
   demoVenueCreated = false; venueAdmin = false; venueApplications = [];
   demoVenueOffers = [{ id: "70000000-0000-4000-8000-000000000003", place_id: demoVenueId, title: "Tapa de bienvenida · Demo", description: "Oferta de ejemplo", includes_alcohol: false, days_of_week: [1, 2, 3, 4, 5, 6, 7], valid_until_time: null, is_active: true }];
   // Leaflet es real; solo se aíslan las imágenes externas del callejero.
@@ -285,26 +306,18 @@ test("el perfil guarda procedencia y feedback con confirmación", async ({ page 
   expect(lastFeedback).toBe("Quiero compartir planes con mis amigos.");
 });
 
-test("se puede enviar y cancelar una solicitud de amistad", async ({ page }) => {
+test("la ruta antigua abre códigos sin solicitudes ni red social", async ({ page }) => {
   await enterPilot(page, "/amigos");
-  await page.getByLabel("Código de tu amigo").fill("abcdef0123456789");
-  await page.getByRole("button", { name: "Enviar solicitud" }).click();
-  await expect(page.getByRole("heading", { name: "Ana", exact: true })).toBeVisible();
-  await expect(page.getByText("Solicitud enviada · pendiente")).toBeVisible();
-  await page.getByRole("button", { name: "Cancelar solicitud", exact: true }).click();
-  await expect(page.getByText(/Todavía no tienes amigos/)).toBeVisible();
+  await expect(page).toHaveURL(/\/invitaciones$/);
+  await expect(page.getByRole("heading", { name: "Invita con tu código" })).toBeVisible();
+  await page.getByLabel("Código de quien te invitó").fill("abcdef0123456789");
+  await page.getByRole("button", { name: "Asociar invitación" }).click();
+  await expect(page.getByRole("status")).toContainText("primera compra validada");
+  await expect(page.getByText("Ya tienes una invitación asociada.")).toBeVisible();
+  await expect(page.getByRole("button", { name: /solicitud/ })).toHaveCount(0);
 });
 
-test("el destinatario puede aceptar una solicitud y eliminar la amistad", async ({ page }) => {
-  mockFriends = [{ id: "60000000-0000-0000-0000-000000000001", name: "Ana", status: "pending", incoming: true }];
-  await enterPilot(page, "/amigos");
-  await page.getByRole("button", { name: "Aceptar", exact: true }).click();
-  await expect(page.getByText("Amistad aceptada")).toBeVisible();
-  await page.getByRole("button", { name: "Eliminar amistad" }).click();
-  await expect(page.getByText(/Todavía no tienes amigos/)).toBeVisible();
-});
-
-test("la valoración se guarda una sola vez y los puntos aparecen en el perfil", async ({ page }) => {
+test("la valoración se guarda una sola vez sin sumar puntos nuevos", async ({ page }) => {
   await enterPilot(page, "/valoraciones");
   await page.getByLabel("Puntuación de Sala de prueba").selectOption("4");
   await page.getByLabel("Comentario (opcional)").fill("Buena música.");
@@ -312,7 +325,7 @@ test("la valoración se guarda una sola vez y los puntos aparecen en el perfil",
   await expect(page.getByText("Tu valoración: 4 de 5 ★")).toBeVisible();
   await expect(page.getByRole("button", { name: "Guardar valoración" })).toHaveCount(0);
   await page.goto("/perfil");
-  await expect(page.locator("dt", { hasText: /^Puntos$/ }).locator("+ dd")).toHaveText("15");
+  await expect(page.locator("dt", { hasText: /^Puntos$/ }).locator("+ dd")).toHaveText("0");
 });
 
 test("la barra tiene cinco accesos y el menú lateral permite abrir perfil y cerrar con Escape", async ({ page }) => {
@@ -369,24 +382,11 @@ test("con base vacía hay eventos demo, planes persistentes y check-in simulado"
   await plans.getByRole("button", { name: "Simular check-in" }).click();
   await plans.getByLabel("Valorar House en Ruzafa").selectOption("4");
   await expect(plans.getByText(/Tu valoración demo: 4/)).toBeVisible();
+  await plans.getByRole("button", { name: "Simular compra validada" }).click();
   await page.goto("/demo");
-  await expect(page.getByText(/Puntos demo: 15/)).toBeVisible();
+  await expect(page.getByText(/Puntos demo: 10/)).toBeVisible();
   await page.getByRole("button", { name: "Reiniciar datos demo" }).click();
   await expect(page.getByText(/Puntos demo: 0/)).toBeVisible();
-});
-
-test("los amigos simulados se pueden aceptar y restaurar sin cambiar amigos reales", async ({ page }) => {
-  await enterPilot(page, "/amigos");
-  const demos = page.getByRole("region", { name: "Amigos simulados" });
-  await demos.getByRole("button", { name: "Aceptar solicitud demo" }).click();
-  await expect(demos.getByText("Amistad simulada")).toHaveCount(2);
-  await page.reload();
-  await expect(demos.getByText("Amistad simulada")).toHaveCount(2);
-  expect(mockFriends).toEqual([]);
-  await page.goto("/demo");
-  await page.getByRole("button", { name: "Reiniciar datos demo" }).click();
-  await page.goto("/amigos");
-  await expect(demos.getByRole("button", { name: "Aceptar solicitud demo" })).toBeVisible();
 });
 
 test("cerrar sesión desde el menú vuelve a la portada", async ({ page }) => {
@@ -490,4 +490,50 @@ test("el flujo preparado de revisión exige confirmar antes de publicar", async 
   await page.getByRole("checkbox", { name: /He revisado la información/ }).check();
   await page.getByRole("button", { name: "Confirmar decisión" }).click();
   await expect(page.getByText("No hay solicitudes pendientes.")).toBeVisible();
+});
+
+test("el cliente genera un QR temporal de compra para su local", async ({ page }) => {
+  await enterPilot(page, "/compras");
+  await page.getByRole("button", { name: "Generar mi QR de compra" }).click();
+  await expect(page.getByLabel("QR de compra para el personal")).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("Válido durante");
+  await page.getByText("Código para copiar al personal", { exact: true }).click();
+  await expect(page.locator("code")).toHaveText(`HUNTER:PURCHASE:${demoVenueId}:${purchaseToken}`);
+});
+
+test("el personal valida y anula una compra demo con confirmación de pago", async ({ page }) => {
+  demoVenueCreated = true;
+  await enterPilot(page, `/panel/${demoVenueId}/compras`);
+  await page.getByLabel("QR o código de compra del cliente").fill("QR-CHECKIN-INVALIDO");
+  await page.getByRole("button", { name: "Comprobar QR de compra" }).click();
+  await expect(page.locator("p[role=alert]")).toContainText("no es un QR de compra");
+  await page.getByLabel("QR o código de compra del cliente").fill(`HUNTER:PURCHASE:${demoVenueId}:${purchaseToken}`);
+  await page.getByRole("button", { name: "Comprobar QR de compra" }).click();
+  await page.getByLabel("Referencia del ticket").fill("DEMO-001");
+  await page.getByRole("button", { name: "Confirmar compra pagada" }).click();
+  expect(purchaseRecorded).toBe(false);
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Confirmar compra pagada" }).click();
+  await expect(page.getByRole("status")).toContainText("Compra demo registrada");
+  await page.getByRole("button", { name: "Anular esta compra" }).click();
+  await page.getByLabel("Motivo de anulación").fill("Ticket devuelto");
+  await page.getByRole("button", { name: "Confirmar anulación" }).click();
+  await expect(page.getByRole("status")).toContainText("Compra anulada");
+  await expect(page.getByText("Anulada", { exact: true })).toBeVisible();
+  await page.goto("/compras");
+  await expect(page.getByText("Demo · Anulada · sin puntos")).toBeVisible();
+});
+
+test("el ranking exige participar con alias y separa el ejemplo ficticio", async ({ page }) => {
+  await enterPilot(page, "/ranking");
+  await expect(page.getByText("Tus puntos del mes")).toBeVisible();
+  await page.getByLabel("Alias público del ranking").fill("Luz Piloto");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Guardar participación" }).click();
+  await expect(page.getByRole("status")).toContainText("Participación guardada");
+  await page.getByRole("button", { name: "Ver ejemplo ficticio del ranking" }).click();
+  await expect(page.getByText("Solo demo · No son usuarios ni puntos reales")).toBeVisible();
+  await page.getByRole("checkbox").uncheck();
+  await page.getByRole("button", { name: "Guardar participación" }).click();
+  await expect(page.getByRole("status")).toContainText("Tus puntos se conservan");
 });

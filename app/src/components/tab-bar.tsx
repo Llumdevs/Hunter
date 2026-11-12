@@ -1,6 +1,6 @@
 "use client";
 
-import { Map, Moon, ScanLine, Ticket, Users } from "lucide-react";
+import { Map, Moon, ScanLine, Ticket, Gift } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -8,7 +8,7 @@ const TABS = [
   { href: "/", label: "Esta noche", Icon: Moon },
   { href: "/mapa", label: "Mapa", Icon: Map },
   { href: "/planes", label: "Mis planes", Icon: Ticket },
-  { href: "/amigos", label: "Amigos", Icon: Users },
+  { href: "/invitaciones", label: "Invitar", Icon: Gift },
 ] as const;
 
 function Tab({ href, label, Icon, active }: (typeof TABS)[number] & { active: boolean }) {

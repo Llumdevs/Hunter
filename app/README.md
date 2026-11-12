@@ -1,5 +1,12 @@
 # Hunter · app
 
+## Compras y ranking mensual
+
+Reglas, límites, demo y activación: [`../docs/compras-ranking.md`](../docs/compras-ranking.md).
+La migración `20261112120000_purchase_rewards.sql` sustituye los puntos por visitas
+por compras validadas por personal e invitaciones por código. No hay red social.
+Ranking voluntario con alias y premio ficticio, sin administradores configurados.
+
 ## Hunter para locales
 
 Entrada en `/locales` y gestión en `/panel`, dentro del mismo despliegue.
@@ -29,11 +36,11 @@ Activación, permisos y pruebas: [`../docs/locales.md`](../docs/locales.md).
   locales y eventos **Demo**. Los errores de API se muestran y no se disfrazan
   de datos de prueba. Los datos reales tienen prioridad.
 - En **Pruebas y datos demo** se pueden abrir los cuatro eventos y reiniciar
-  los planes y amigos simulados. La demo permite apuntarse, simular check-in,
-  valorar y probar solicitudes sin escribir en Supabase ni otorgar puntos reales.
+  los planes simulados. La demo permite apuntarse, simular check-in,
+  valorar y simular compras validadas sin escribir en Supabase ni otorgar puntos reales.
   Se guarda en `localStorage` (`hunter-demo-v1`) de ese navegador, separada de
-  la cuenta real. Los amigos simulados están etiquetados y separados de los reales.
-- No hay migraciones nuevas para esta entrega. Los ejemplos de la interfaz no
+  la cuenta real. Los datos antiguos se migran sin recuperar la red social.
+- Los ejemplos de la interfaz no
   se cargan en las tablas de producción ni usan el seed local.
 
 ## Funciones del piloto
@@ -43,10 +50,10 @@ feedback, solicitudes de amistad por código y valoraciones de visitas verificad
 Aplicarla con `npx supabase db push --linked` antes de desplegar estas pantallas.
 No usar `db:reset` en el proyecto alojado.
 
-Los puntos se calculan en servidor: 10 por check-in verificado no marcado y 5 por
-valoración, una por visita. Las amistades solo comparten nombre y estado; no
-comparten ubicación, correo ni planes. Las medias de los locales se muestran
-desde tres valoraciones; los comentarios no son públicos.
+La migración de compras retira las solicitudes de amistad y congela los puntos
+anteriores como histórico. Los nuevos puntos solo proceden de compras e invitaciones
+cualificadas, con los límites documentados arriba. Las medias de los locales se
+muestran desde tres valoraciones; los comentarios no son públicos.
 
 La portada permite filtrar temporalmente música, ambiente y presupuesto sin
 cambiar los gustos guardados. El mapa permite seleccionar un local para ver su
@@ -166,8 +173,8 @@ Login con código, alta de perfil (+18, validado también en RLS), página del Q
 pantalla de canje (`/canje/[id]`) y escáner (`/escanear`). La lógica está en `src/lib` con tests unitarios.
 
 ## Pendiente (siguientes incrementos)
-- Frontend: «Esta noche», ficha del local y Mis planes. Inglés.
+- Traducción al inglés.
 - Panel del local: perfil agregado del público (con muestra mínima), gráfica semanal, alta de locales desde un admin.
 - Panel del local (incluido el modo pantalla) y vistas agregadas con muestra mínima.
-- Eventos (modo Fallas), valoraciones, preferencias y recomendación, puntos.
+- Eventos especiales (modo Fallas) e integración de cobro/TPV.
 - Límite por IP en las funciones públicas: requiere una capa delante de la API (proxy o CDN). Hoy el límite es por usuario.

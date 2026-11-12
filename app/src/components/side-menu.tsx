@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X, User, SlidersHorizontal, Star, FlaskConical, ShieldCheck, LogOut, Store } from "lucide-react";
+import { Menu, X, User, SlidersHorizontal, Star, FlaskConical, ShieldCheck, LogOut, Store, QrCode, Trophy } from "lucide-react";
 import { HunterLogo } from "@/components/logo";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const LINKS = [
+  { href: "/compras", label: "Mi QR de compra", Icon: QrCode },
+  { href: "/ranking", label: "Ranking mensual", Icon: Trophy },
   { href: "/perfil", label: "Mi perfil", Icon: User },
   { href: "/perfil/gustos", label: "Mis gustos", Icon: SlidersHorizontal },
   { href: "/valoraciones", label: "Mis valoraciones", Icon: Star },

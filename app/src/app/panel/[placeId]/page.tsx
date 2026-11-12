@@ -42,6 +42,8 @@ export default async function PlacePanelPage({ params }: { params: Promise<{ pla
       </header>
       {place.is_demo && <DemoVenueNotice />}
 
+      <Link href={`/panel/${placeId}/compras`} className="rounded-2xl bg-orange p-4 text-center font-bold text-white">Validar compras y gestionar anulaciones</Link>
+
       <section aria-labelledby="tonight" className="flex flex-col gap-2">
         <h2 id="tonight" className="text-lg font-bold">Esta noche</h2>
         <div className="grid grid-cols-3 gap-2">

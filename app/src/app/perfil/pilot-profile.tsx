@@ -35,7 +35,8 @@ export function PilotProfileDetails({ profile }: { profile: PilotProfile }) {
     <dl className="glass grid grid-cols-2 gap-3 rounded-3xl p-5 text-sm">
       {[["Contacto", profile.contact || "Invitado"], ["Edad", `${profile.age} años`], ["De", profile.home_city || "Sin indicar"], ["Puntos", profile.points], ["Planes apuntados", profile.signups], ["Check-ins", profile.checkins], ["Valoraciones", profile.reviews]].map(([label, value]) => <div key={label} className="contents"><dt className="text-muted">{label}</dt><dd className="break-words text-right font-semibold">{value}</dd></div>)}
     </dl>
-    <p className="text-xs text-muted">10 puntos por check-in verificado y 5 por valoración, una vez por visita. Son puntos del piloto, sin valor económico.</p>
+    <p className="text-xs text-muted">Puntos por compras validadas e invitaciones cualificadas, con límites. Los check-ins y las valoraciones no suman puntos nuevos. Consulta las reglas en Ranking mensual.</p>
+    {profile.legacy_points > 0 && <p className="text-xs text-muted">Histórico anterior: {profile.legacy_points} puntos. Se conservan como referencia y no cuentan para el ranking.</p>}
     <form onSubmit={(event) => save(event, "city")} className="glass flex flex-col gap-3 rounded-3xl p-5">
       <Field label="¿De dónde eres? (opcional)"><input name="city" defaultValue={profile.home_city ?? ""} maxLength={80} autoComplete="address-level2" className={INPUT_CLASS} /></Field>
       <PrimaryButton disabled={busy}>Guardar procedencia</PrimaryButton>

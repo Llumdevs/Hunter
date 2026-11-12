@@ -251,6 +251,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"point_events": {
+                  Row: {
+                    "created_at": string,"id": string,"kind": string,"points": number,"points_month": string,"purchase_id": string,"referral_user_id": string | null,"revoked_at": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"kind": string,"points": number,"points_month": string,"purchase_id": string,"referral_user_id"?: string | null,"revoked_at"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"kind"?: string,"points"?: number,"points_month"?: string,"purchase_id"?: string,"referral_user_id"?: string | null,"revoked_at"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "point_events_purchase_id_fkey"
+      columns: ["purchase_id"]
+isOneToOne: false
+      referencedRelation: "validated_purchases"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"profiles": {
                   Row: {
                     "birthdate": string,"created_at": string,"display_name": string,"friend_code": string,"home_city": string | null,"id": string,"locale": string
@@ -261,6 +281,20 @@ isOneToOne: false
                   }
                   Update: {
                     "birthdate"?: string,"created_at"?: string,"display_name"?: string,"friend_code"?: string,"home_city"?: string | null,"id"?: string,"locale"?: string
+                  }
+                  Relationships: [
+
+                  ]
+                },"ranking_profiles": {
+                  Row: {
+                    "alias": string,"participating": boolean,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "alias": string,"participating"?: boolean,"user_id": string
+                  }
+                  Update: {
+                    "alias"?: string,"participating"?: boolean,"user_id"?: string
                   }
                   Relationships: [
 
@@ -290,6 +324,20 @@ isOneToOne: false
       referencedRelation: "offers"
       referencedColumns: ["id"]
     }
+                  ]
+                },"referrals": {
+                  Row: {
+                    "created_at": string,"invited_user_id": string,"inviter_user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"invited_user_id": string,"inviter_user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"invited_user_id"?: string,"inviter_user_id"?: string
+                  }
+                  Relationships: [
+
                   ]
                 },"signups": {
                   Row: {
@@ -325,6 +373,26 @@ isOneToOne: false
                   Relationships: [
 
                   ]
+                },"validated_purchases": {
+                  Row: {
+                    "business_night": string,"cancellation_reason": string | null,"cancelled_at": string | null,"cancelled_by": string | null,"id": string,"is_demo": boolean,"operation_id": string,"place_id": string,"receipt_day": string,"receipt_hash": string,"request_id": string,"user_id": string,"validated_at": string,"validated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_night": string,"cancellation_reason"?: string | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"id"?: string,"is_demo": boolean,"operation_id": string,"place_id": string,"receipt_day": string,"receipt_hash": string,"request_id": string,"user_id": string,"validated_at"?: string,"validated_by"?: string | null
+                  }
+                  Update: {
+                    "business_night"?: string,"cancellation_reason"?: string | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"id"?: string,"is_demo"?: boolean,"operation_id"?: string,"place_id"?: string,"receipt_day"?: string,"receipt_hash"?: string,"request_id"?: string,"user_id"?: string,"validated_at"?: string,"validated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "validated_purchases_place_id_fkey"
+      columns: ["place_id"]
+isOneToOne: false
+      referencedRelation: "places"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"venue_applications": {
                   Row: {
                     "applicant_id": string,"created_at": string,"decision_note": string,"details": NonNullable<Json>,"id": string,"place_id": string | null,"reviewed_at": string | null,"reviewed_by": string | null,"status": string
@@ -354,22 +422,43 @@ isOneToOne: false
             "cancel_signup":
 { Args: { "p_place_id": string }; Returns: Json
                            },
+"cancel_validated_purchase":
+{ Args: { "p_purchase": string,"p_reason": string }; Returns: Json
+                           },
 "cancel_venue_application":
 { Args: { "p_id": string }; Returns: Json
                            },
 "check_in":
 { Args: { "p_lat"?: number,"p_lng"?: number,"p_place_id": string,"p_screen_code"?: string,"p_static_token"?: string }; Returns: Json
                            },
+"claim_referral":
+{ Args: { "p_code": string }; Returns: Json
+                           },
 "create_my_demo_venue":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"create_purchase_request":
+{ Args: { "p_place": string }; Returns: Json
+                           },
 "delete_my_account":
 { Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"inspect_purchase_request":
+{ Args: { "p_place": string,"p_token": string }; Returns: Json
+                           },
+"monthly_ranking":
+{ Args: { "p_month"?: string }; Returns: Json
                            },
 "my_friends":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
 "my_pilot_profile":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"my_purchase_history":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"my_referrals":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
 "my_reviewable_visits":
@@ -380,6 +469,9 @@ isOneToOne: false
               "billable": number,"checkins": number,"night_date": string,"redemptions": number,"signups": number
             }[]
                            },
+"place_purchase_history":
+{ Args: { "p_place": string }; Returns: Json
+                           },
 "place_qr_credentials":
 { Args: { "p_place_id": string }; Returns: {
               "screen_secret": string,"static_token": string
@@ -387,6 +479,9 @@ isOneToOne: false
                            },
 "place_rating_summary":
 { Args: { "p_place": string }; Returns: Json
+                           },
+"purchase_venues":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "recommendation_settings":
 { Args: Record<PropertyKey, never>; Returns: Json
@@ -409,6 +504,9 @@ isOneToOne: false
 "send_pilot_feedback":
 { Args: { "p_message": string }; Returns: Json
                            },
+"set_ranking_participation":
+{ Args: { "p_alias": string,"p_participating": boolean }; Returns: Json
+                           },
 "sign_up":
 { Args: { "p_place_id": string }; Returns: Json
                            },
@@ -422,6 +520,9 @@ isOneToOne: false
                            },
 "update_my_city":
 { Args: { "p_city": string }; Returns: Json
+                           },
+"validate_purchase":
+{ Args: { "p_operation": string,"p_place": string,"p_receipt": string,"p_token": string }; Returns: Json
                            },
 "venue_management_context":
 { Args: Record<PropertyKey, never>; Returns: Json

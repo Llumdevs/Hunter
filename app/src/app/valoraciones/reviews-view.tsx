@@ -21,14 +21,14 @@ export function ReviewsView({ visits }: { visits: Visit[] }) {
       });
       const message = pilotResult(data, !!apiError);
       if (message) return setError(message);
-      setNotice("Valoración guardada. Has ganado 5 puntos.");
+      setNotice("Valoración guardada. Gracias por tu opinión.");
       router.refresh();
     } catch { setError("No hemos podido conectar. Inténtalo de nuevo."); }
     finally { setBusy(false); }
   }
   return <section className="flex flex-col gap-5">
     <h1 className="text-3xl font-extrabold">Valora tus visitas</h1>
-    <p className="text-sm text-muted">Solo puedes valorar visitas con check-in verificado, una vez por visita. Cada valoración suma 5 puntos del piloto. Tu comentario no es público.</p>
+    <p className="text-sm text-muted">Solo puedes valorar visitas con check-in verificado, una vez por visita. Las valoraciones no suman puntos. Tu comentario no es público.</p>
     {notice && <p role="status" className="text-sm text-lime">{notice}</p>}
     {error && <ErrorText>{error}</ErrorText>}
     {visits.length === 0 && <p className="glass rounded-3xl p-5 text-muted">Aún no tienes visitas verificadas. Haz check-in en un local para poder valorarlo.</p>}
