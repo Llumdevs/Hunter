@@ -537,3 +537,59 @@ test("el ranking exige participar con alias y separa el ejemplo ficticio", async
   await page.getByRole("button", { name: "Guardar participación" }).click();
   await expect(page.getByRole("status")).toContainText("Tus puntos se conservan");
 });
+
+test("la búsqueda y las categorías filtran los eventos fotográficos", async ({ page }) => {
+  emptyPlaces = true;
+  await enterPilot(page, "/");
+  const events = page.getByRole("region", { name: "Eventos simulados" });
+  await expect(events.getByRole("link")).toHaveCount(4);
+  await page.getByRole("searchbox", { name: "Buscar un evento o local" }).fill("ruzafa");
+  await expect(events.getByRole("link")).toHaveCount(1);
+  await expect(events.getByRole("heading", { name: "House en Ruzafa" })).toBeVisible();
+  await page.getByRole("searchbox").fill("media luz");
+  await expect(events.getByRole("heading", { name: "Jazz a media luz" })).toBeVisible();
+  await page.getByRole("searchbox").fill("");
+  await page.getByRole("button", { name: "En directo", exact: true }).click();
+  await expect(events.getByRole("link")).toHaveCount(1);
+  await expect(events.getByRole("heading", { name: "Jazz a media luz" })).toBeVisible();
+  await page.getByRole("button", { name: "Todo", exact: true }).click();
+  await page.locator("img").evaluateAll(async (images) => { await Promise.all(images.map((image) => (image as HTMLImageElement).decode().catch(() => {}))); });
+  await page.screenshot({ path: test.info().outputPath("inicio-editorial.png"), style: "nextjs-portal { display: none !important; }" });
+  for (const width of [320, 768]) {
+    await page.setViewportSize({ width, height: 850 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
+});
+
+test("la introducción permite cambiar de paso y continúa al acceso", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("tab", { name: /2\. Haz/ }).click();
+  await expect(page.getByRole("tabpanel")).toContainText("Haz que la noche sea tuya");
+  await page.keyboard.press("ArrowDown");
+  await expect(page.getByRole("tab", { name: /3\. Nos/ })).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("Home");
+  await expect(page.getByRole("tabpanel")).toContainText("Encuentra tu frecuencia");
+  await page.locator("img").evaluateAll(async (images) => { await Promise.all(images.map((image) => (image as HTMLImageElement).decode().catch(() => {}))); });
+  await page.screenshot({ path: test.info().outputPath("portada-editorial.png"), style: "nextjs-portal { display: none !important; }" });
+  await page.getByRole("link", { name: "Empezar", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Entra en Hunter" })).toBeVisible();
+});
+
+test("la ficha ofrece galería ampliable y conserva la acción de apuntarse", async ({ page }) => {
+  emptyPlaces = true;
+  await enterPilot(page, "/local/d0000000-0000-4000-8000-000000000002");
+  await expect(page.getByRole("heading", { name: "Jazz Cellar · Demo" })).toBeVisible();
+  await page.getByRole("button", { name: "Ampliar foto 2", exact: true }).click();
+  const gallery = page.getByRole("dialog", { name: "Galería de fotos" });
+  await expect(gallery).toBeVisible();
+  await expect(gallery.getByText("2 / 4")).toBeVisible();
+  await gallery.getByRole("button", { name: "Foto siguiente" }).click();
+  await expect(gallery.getByText("3 / 4")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(gallery).not.toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.locator("img").evaluateAll(async (images) => { await Promise.all(images.map((image) => (image as HTMLImageElement).decode().catch(() => {}))); });
+  await page.screenshot({ path: test.info().outputPath("ficha-editorial.png"), style: "nextjs-portal { display: none !important; }" });
+  await page.getByRole("button", { name: "Apuntarme a este plan demo" }).click();
+  await expect(page.getByRole("link", { name: /Plan demo guardado/ })).toBeVisible();
+});

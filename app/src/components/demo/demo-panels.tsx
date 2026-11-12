@@ -3,28 +3,33 @@
 import Link from "next/link";
 import { useDemo } from "./provider";
 import { DEMO_EVENTS, DEMO_PLACES } from "@/lib/demo/catalog";
+import { tonightDate } from "@/lib/tonight/night";
+import { EventPoster } from "./event-poster";
 import { demoPoints } from "@/lib/demo/state";
 
 export function DemoBanner() {
-  return <p className="rounded-2xl border border-white/10 bg-white/[.025] px-3 py-2 text-[11px] leading-relaxed text-muted">Demo · Locales, eventos y ofertas simulados en Valencia. Imágenes de ambiente generadas con IA. No son reservas ni promociones reales.</p>;
+  return <p className="rounded-2xl border border-white/10 bg-white/[.025] px-3 py-2 text-[11px] leading-relaxed text-muted">Demo · Locales y ofertas ficticios. Imágenes de ambiente generadas con IA.</p>;
 }
 
-export function DemoEvents() {
-  return <section aria-label="Eventos simulados" className="flex flex-col gap-3">
-    <h2 className="text-lg font-bold">Eventos de prueba esta noche</h2>
-    {DEMO_EVENTS.map((event) => <Link key={event.placeId} href={`/local/${event.placeId}`} className="glass flex flex-col gap-2 rounded-[28px] p-5">
-      <div className="flex items-center justify-between gap-3"><h3 className="font-bold">{event.title}</h3><span className="text-xs text-lime">Demo · {event.time}</span></div>
-      <p className="text-sm text-muted">{event.description}</p>
-    </Link>)}
+export function DemoEvents({ placeIds, hideHeading = false }: { placeIds?: string[]; hideHeading?: boolean }) {
+  const now = new Date(`${tonightDate()}T12:00:00Z`);
+  const day = new Intl.DateTimeFormat("es-ES", { day: "2-digit", timeZone: "Europe/Madrid" }).format(now);
+  const month = new Intl.DateTimeFormat("es-ES", { month: "short", timeZone: "Europe/Madrid" }).format(now).replace(".", "");
+  const events = DEMO_EVENTS.filter((event) => !placeIds || placeIds.includes(event.placeId));
+  if (!events.length) return null;
+  return <section aria-label="Eventos simulados" className="flex flex-col gap-4">
+    {!hideHeading && <div className="flex items-baseline justify-between gap-3"><h2 className="text-lg font-extrabold">En el radar</h2><span className="text-[10px] font-semibold text-orange-soft">Esta noche · Demo</span></div>}
+    {events.map((event) => <EventPoster key={event.placeId} event={event} index={DEMO_EVENTS.indexOf(event)} day={day} month={month} />)}
   </section>;
 }
 
-export function DemoSignup({ placeId }: { placeId: string }) {
+export function DemoSignup({ placeId, price }: { placeId: string; price?: string }) {
   const { state, update, ready } = useDemo();
   const selected = state.plans.some((plan) => plan.placeId === placeId);
-  return <div className="fixed inset-x-0 bottom-6 z-10 mx-auto w-[calc(100%-2.5rem)] max-w-md">
-    {selected ? <Link href="/planes" className="glass flex min-h-14 items-center justify-center rounded-full font-bold">✓ Plan demo guardado · ver Mis planes</Link>
-      : <button type="button" disabled={!ready} onClick={() => update((current) => ({ ...current, plans: [...current.plans.filter((plan) => plan.placeId !== placeId), { placeId, checkedIn: false, purchaseValidated: false, rating: null }] }))} className="flex min-h-14 w-full items-center justify-center rounded-full bg-orange p-3 font-bold text-white disabled:opacity-50">Apuntarme a este plan demo</button>}
+  return <div className="booking-bar fixed inset-x-0 bottom-0 z-10 mx-auto flex w-full max-w-md items-center gap-5 px-6 pt-4 pb-6">
+    <div className="flex-none"><p className="text-[10px] text-muted">Presupuesto</p><b className="text-2xl">{price ?? "—"}</b></div>
+    {selected ? <Link href="/planes" className="flex min-h-14 flex-1 items-center justify-center rounded-full bg-orange px-4 text-xs font-bold text-night-950">✓ Plan demo guardado · ver Mis planes</Link>
+      : <button type="button" disabled={!ready} onClick={() => update((current) => ({ ...current, plans: [...current.plans.filter((plan) => plan.placeId !== placeId), { placeId, checkedIn: false, purchaseValidated: false, rating: null }] }))} className="flex min-h-14 flex-1 items-center justify-center rounded-full bg-orange p-3 text-xs font-bold text-night-950 disabled:opacity-50">Apuntarme a este plan demo</button>}
   </div>;
 }
 

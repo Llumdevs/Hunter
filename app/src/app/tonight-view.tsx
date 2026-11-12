@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, AudioLines, LocateFixed, SlidersHorizontal } from "lucide-react";
+import { ArrowUpRight, AudioLines, Disc3, LocateFixed, Mic2, MessageCircle, Search, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { MapLegend, Minimap, type MapPin } from "@/components/tonight/minimap";
@@ -9,7 +9,8 @@ import { VenueCard } from "@/components/tonight/venue-card";
 import { recommend } from "@/lib/tonight/recommend";
 import type { TonightData } from "@/lib/tonight/load";
 import { EMPTY_FILTERS, filterPlaces, type TonightFilters } from "@/lib/tonight/filters";
-import { MUSIC, VIBES, PRICES } from "@/lib/tonight/catalog";
+import { MUSIC, VIBES, PRICES, labelFor } from "@/lib/tonight/catalog";
+import { DEMO_EVENTS } from "@/lib/demo/catalog";
 import { DemoBanner, DemoEvents } from "@/components/demo/demo-panels";
 
 type Props = TonightData & { displayName: string };
@@ -17,7 +18,12 @@ type Props = TonightData & { displayName: string };
 export function TonightView({ places, weights, preferences, displayName, demoMode, loadError }: Props) {
   const { position, denied, locate } = useMyPosition();
   const [filters, setFilters] = useState<TonightFilters>(EMPTY_FILTERS);
-  const visiblePlaces = useMemo(() => filterPlaces(places, filters), [places, filters]);
+  const [query, setQuery] = useState("");
+  const visiblePlaces = useMemo(() => {
+    const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const needle = normalize(query.trim());
+    return filterPlaces(places, filters).filter((place) => normalize(`${place.name} ${place.zone} ${labelFor(MUSIC, place.music) ?? ""} ${DEMO_EVENTS.find((event) => event.placeId === place.id)?.title ?? ""}`).includes(needle));
+  }, [places, filters, query]);
   const { forYou, alsoLike } = useMemo(() => recommend(visiblePlaces, preferences, weights), [visiblePlaces, preferences, weights]);
   const hasPreferences = forYou.some((r) => r.score.fit !== null) || alsoLike.length > 0;
   const forYouIds = new Set(forYou.map((r) => r.place.id));
@@ -27,21 +33,16 @@ export function TonightView({ places, weights, preferences, displayName, demoMod
   }));
 
   return (
-    <section className="flex flex-col gap-4">
-      <header className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted">Hola, {displayName}</p>
-        </div>
-        <Link href="/perfil/gustos" aria-label="Editar mis gustos" className="glass grid h-11 w-11 place-items-center rounded-full">
-          <SlidersHorizontal aria-hidden className="h-5 w-5" />
-        </Link>
-      </header>
-
-      <div><p className="eyebrow mb-3 flex items-center gap-2 text-lime"><AudioLines aria-hidden className="h-4 w-4" />Encuentra tu frecuencia</p><h1 className="text-[clamp(42px,11vw,52px)] leading-[.98] font-black tracking-[-.06em]">Esta noche<br /><span className="outline-type">en Valencia</span><span className="text-lime">.</span></h1></div>
-      <div aria-label="Explorar por ambiente" className="horizontal-carousel -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">{[{ label: "Todo", vibe: "" }, { label: "Para bailar", vibe: "bailar" }, { label: "En directo", vibe: "directo" }, { label: "Para hablar", vibe: "hablar" }].map(({ label, vibe }) => <button key={label} type="button" aria-pressed={filters.vibe === vibe} onClick={() => setFilters({ ...filters, vibe })} className={`min-h-11 flex-none rounded-full border px-4 text-xs font-bold transition-colors ${filters.vibe === vibe ? "border-lime bg-lime text-night-950" : "border-white/15 bg-white/5 text-muted"}`}>{label}</button>)}</div>
+    <section aria-label={`Planes para ${displayName}`} className="flex flex-col gap-4">
+      <label className="search-line flex h-12 items-center gap-3 border-b border-white/10 px-1"><Search aria-hidden className="h-4 w-4 flex-none text-muted" /><input type="search" aria-label="Buscar un evento o local" placeholder="Busca un evento, local o barrio" value={query} onChange={(e) => setQuery(e.target.value)} className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-muted/70" /></label>
+      <div aria-label="Explorar por ambiente" className="horizontal-carousel -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">{[{ label: "Todo", vibe: "", Icon: AudioLines }, { label: "Para bailar", vibe: "bailar", Icon: Disc3 }, { label: "En directo", vibe: "directo", Icon: Mic2 }, { label: "Para hablar", vibe: "hablar", Icon: MessageCircle }].map(({ label, vibe, Icon }) => <button key={label} type="button" aria-pressed={filters.vibe === vibe} onClick={() => setFilters({ ...filters, vibe })} className={`flex min-h-11 flex-none items-center gap-2 rounded-xl px-3 text-xs font-semibold ${filters.vibe === vibe ? "bg-white/15 text-white" : "bg-white/[.04] text-muted"}`}><Icon aria-hidden className={`h-4 w-4 ${filters.vibe === vibe ? "text-orange" : ""}`} />{label}</button>)}</div>
+      <header className="flex items-center justify-between gap-3"><div><h1 className="text-xl font-extrabold">Esta noche en Valencia</h1></div><Link href="/perfil/gustos" aria-label="Editar mis gustos" className="grid h-11 w-11 place-items-center rounded-full bg-white/5"><SlidersHorizontal aria-hidden className="h-4 w-4" /></Link></header>
       {loadError && <p role="alert" className="text-sm text-rose">{loadError}</p>}
-      <details className="glass rounded-2xl p-3">
-        <summary className="cursor-pointer text-sm font-bold">Filtrar esta noche{Object.values(filters).some(Boolean) ? ` (${Object.values(filters).filter(Boolean).length})` : ""}</summary>
+
+
+      {demoMode && <DemoEvents hideHeading placeIds={visiblePlaces.map((p) => p.id)} />}
+      <details className="border-b border-white/10 pb-3">
+        <summary className="cursor-pointer text-xs font-semibold text-muted">Filtrar esta noche{Object.values(filters).some(Boolean) ? ` (${Object.values(filters).filter(Boolean).length})` : ""}</summary>
         <div className="mt-4 flex flex-col gap-3">
           {([{ key: "music", label: "Música esta noche", options: MUSIC }, { key: "vibe", label: "Ambiente esta noche", options: VIBES }, { key: "price", label: "Presupuesto esta noche", options: PRICES }] as const).map(({ key, label, options }) => (
             <label key={key} className="flex flex-col gap-1 text-sm">
@@ -56,7 +57,6 @@ export function TonightView({ places, weights, preferences, displayName, demoMod
           <button type="button" onClick={() => setFilters(EMPTY_FILTERS)} className="text-sm text-orange-soft underline">Quitar filtros</button>
         </div>
       </details>
-
       {visiblePlaces.length === 0 ? (
         <p className="glass rounded-[var(--radius-card)] p-5 text-muted">{places.length === 0 ? "Esta noche no hay locales abiertos en Hunter todavía." : "No hay locales que coincidan con estos filtros. Prueba a quitar alguno."}</p>
       ) : (
@@ -99,7 +99,6 @@ export function TonightView({ places, weights, preferences, displayName, demoMod
           {denied && <p className="text-xs text-muted">Sin ubicación no podemos mostrar distancias. Puedes seguir igualmente.</p>}
         </>
       )}
-      {demoMode && <DemoEvents />}
     </section>
   );
 }

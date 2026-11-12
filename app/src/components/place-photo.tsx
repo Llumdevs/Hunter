@@ -7,7 +7,7 @@ type Props = {
   alt: string;
   className?: string;
   demo?: boolean;
-  variant?: "night" | "live";
+  variant?: "night" | "live" | "terrace" | "electric";
   eager?: boolean;
 };
 

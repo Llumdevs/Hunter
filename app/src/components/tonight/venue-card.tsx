@@ -19,7 +19,7 @@ export function VenueCard({ place, score, me, matched }: Props) {
   const crowd = crowdLabel(place.signups_visible, place.signups_any);
   return (
     <Link href={`/local/${place.id}`} className="venue-poster relative flex min-h-[340px] w-[82%] max-w-80 flex-none snap-start flex-col justify-end overflow-hidden border border-white/15 p-4">
-      <PlacePhoto path={place.cover_path} alt={place.name} demo={isDemoPlace(place.id)} variant={place.music === "jazz" || place.music === "indie" ? "live" : "night"} className="poster-photo absolute inset-0" />
+      <PlacePhoto path={place.cover_path} alt={place.name} demo={isDemoPlace(place.id)} variant={place.music === "jazz" ? "live" : place.music === "indie" ? "terrace" : place.music === "pop" ? "electric" : "night"} className="poster-photo absolute inset-0" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent" />
       <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-2">
         {score.fit !== null ? <span className={`rounded-full px-3 py-2 text-[11px] font-extrabold text-night-950 ${matched ? "bg-lime" : "bg-orange-soft"}`}>{fitPercentage(score.fit)}</span> : <span className="night-label">Esta noche</span>}

@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X, User, SlidersHorizontal, Star, FlaskConical, ShieldCheck, LogOut, Store, QrCode, Trophy } from "lucide-react";
-import { HunterLogo } from "@/components/logo";
+import { Menu, X, User, SlidersHorizontal, Star, FlaskConical, ShieldCheck, LogOut, Store, QrCode, Trophy, MapPin, ChevronDown } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const LINKS = [
@@ -48,11 +47,10 @@ export function SideMenu() {
   }
 
   return <>
-    <header className="mb-6 flex items-center justify-between gap-4 border-b border-white/10 pb-5">
-      <Link href="/" aria-label="Hunter · inicio"><HunterLogo className="h-7 text-fg" /></Link>
-      <button ref={trigger} type="button" aria-label="Abrir menú" aria-haspopup="dialog" onClick={open} className="glass grid h-11 w-11 place-items-center rounded-2xl">
-        <Menu aria-hidden className="h-5 w-5" />
-      </button>
+    <header className="discovery-header mb-4 flex h-11 items-center justify-between">
+      <button ref={trigger} type="button" aria-label="Abrir menú" aria-haspopup="dialog" onClick={open} className="grid h-11 w-11 place-items-center rounded-full"><Menu aria-hidden className="h-5 w-5" /></button>
+      <Link href="/mapa" className="flex min-h-11 items-center gap-2 text-xs font-semibold"><MapPin aria-hidden className="h-4 w-4 text-orange" />Valencia<ChevronDown aria-hidden className="h-3 w-3 text-muted" /></Link>
+      <Link href="/compras" aria-label="Mi QR de compra" className="grid h-11 w-11 place-items-center rounded-full"><QrCode aria-hidden className="h-5 w-5" /></Link>
     </header>
     <dialog ref={dialog} aria-labelledby="side-menu-title" onCancel={(event) => { event.preventDefault(); close(); }} onClose={() => { document.body.style.overflow = previousOverflow.current; }}
       onClick={(event) => { if (event.target === event.currentTarget) close(); }}

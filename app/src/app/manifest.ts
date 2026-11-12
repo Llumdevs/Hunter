@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Descubre cómo es un sitio antes de ir.",
     start_url: "/",
     display: "standalone",
-    background_color: "#080a09",
-    theme_color: "#080a09",
+    background_color: "#191b19",
+    theme_color: "#191b19",
     lang: "es",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
