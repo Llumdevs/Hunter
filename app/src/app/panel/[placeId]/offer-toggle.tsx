@@ -28,7 +28,7 @@ export function OfferToggle({ offerId, title, active }: { offerId: string; title
     <div className="flex flex-col items-end gap-1">
       <button
         type="button" role="switch" aria-checked={isActive} aria-label={`Oferta activa: ${title}`} disabled={busy} onClick={toggle}
-        className={`relative h-8 w-14 flex-none rounded-full transition ${isActive ? "bg-orange" : "bg-[#ddd5ce]"} disabled:opacity-60`}
+        className={`relative h-8 w-14 flex-none rounded-full transition ${isActive ? "bg-violet" : "bg-[#ddd5ce]"} disabled:opacity-60`}
       >
         <span className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow transition-all ${isActive ? "right-1" : "left-1"}`} />
       </button>

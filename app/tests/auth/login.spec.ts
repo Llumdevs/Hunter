@@ -258,10 +258,12 @@ test("los filtros son temporales y las tarjetas muestran el porcentaje de encaje
   await page.getByRole("button", { name: "Probar sin correo" }).click();
   await expect(page.getByRole("heading", { name: /Esta noche/ })).toBeVisible();
   await expect(page.getByText("100 % para ti", { exact: true })).toBeVisible();
-  await page.getByText("Filtrar esta noche", { exact: true }).click();
+  await page.getByRole("button", { name: "Filtrar esta noche", exact: true }).click();
   await page.getByLabel("Música esta noche").selectOption("jazz");
   await expect(page.getByRole("link", { name: /Sala de prueba/ })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /Jazz de prueba/ }).last()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Para ti", exact: true })).toHaveCount(0);
+  await expect(page).toHaveURL("http://127.0.0.1:3100/");
   await page.getByLabel("Presupuesto esta noche").selectOption("€€€");
   await expect(page.getByText(/No hay locales que coincidan/)).toBeVisible();
   await page.getByRole("button", { name: "Quitar filtros" }).click();
@@ -279,7 +281,7 @@ test("el mapa permite seleccionar un local, ver su oferta y cerrar la tarjeta", 
   const card = page.getByRole("region", { name: "Local seleccionado" });
   await expect(card.getByRole("heading", { name: "Jazz de prueba" })).toBeVisible();
   await expect(card.getByText("Oferta de prueba")).toBeVisible();
-  await expect(card.getByRole("link", { name: "Ver el local" })).toHaveAttribute("href", `/local/${testPlaces[1].id}`);
+  await expect(card.getByRole("link", { name: "Ver el local" })).toHaveAttribute("href", "/local/d0000000-0000-4000-8000-000000000002");
   await card.getByRole("link", { name: "Ver el local" }).click({ trial: true });
   await page.screenshot({ path: test.info().outputPath("mapa-movil.png") });
   await card.getByRole("button", { name: "Cerrar local seleccionado" }).click();
@@ -404,15 +406,21 @@ test("si el callejero falla sigue disponible un mapa sin calles con selección",
   await expect(page.getByRole("region", { name: "Local seleccionado" }).getByRole("heading", { name: "Jazz de prueba" })).toBeVisible();
 });
 
-test("las tarjetas siguen desplazándose sin mostrar la barra horizontal", async ({ page }) => {
+test("las categorías se desplazan sin barra y la home no repite los locales", async ({ page }) => {
   emptyPlaces = true;
   await enterPilot(page, "/");
-  const carousel = page.getByRole("group", { name: "Locales de También te puede gustar" });
+  const carousel = page.locator('[aria-label="Explorar por ambiente"]');
   expect(await carousel.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
   expect(await carousel.evaluate((element) => getComputedStyle(element).scrollbarWidth)).toBe("none");
   await carousel.hover();
   await page.mouse.wheel(400, 0);
   await expect.poll(() => carousel.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+  const events = page.getByRole("region", { name: "Eventos simulados" });
+  const destinations = await events.getByRole("link").evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+  expect(destinations).toHaveLength(4);
+  expect(new Set(destinations).size).toBe(4);
+  await expect(page.getByRole("heading", { name: "Para ti", exact: true })).toHaveCount(0);
+  await expect(page.getByText("Nada encaja del todo esta noche. Mira estas propuestas:")).toHaveCount(0);
 });
 
 test("tocar un punto del minimapa de inicio abre Mapa y no la ficha del local", async ({ page }) => {
@@ -555,6 +563,14 @@ test("la búsqueda y las categorías filtran los eventos fotográficos", async (
   await page.getByRole("button", { name: "Todo", exact: true }).click();
   await page.locator("img").evaluateAll(async (images) => { await Promise.all(images.map((image) => (image as HTMLImageElement).decode().catch(() => {}))); });
   await page.screenshot({ path: test.info().outputPath("inicio-editorial.png"), style: "nextjs-portal { display: none !important; }" });
+  await page.getByRole("button", { name: "Filtrar esta noche" }).click();
+  await expect(page.getByLabel("Música esta noche")).toBeVisible();
+  await expect(page).toHaveURL("http://127.0.0.1:3100/");
+  const apply = await page.getByRole("button", { name: "Ver resultados", exact: true }).boundingBox();
+  expect(apply!.y + apply!.height).toBeLessThan(page.viewportSize()!.height - 80);
+  await page.screenshot({ path: test.info().outputPath("filtros-home.png"), style: "nextjs-portal { display: none !important; }" });
+  await page.getByRole("button", { name: "Ver resultados", exact: true }).click();
+  await expect(page.getByLabel("Música esta noche")).toBeHidden();
   for (const width of [320, 768]) {
     await page.setViewportSize({ width, height: 850 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -592,4 +608,20 @@ test("la ficha ofrece galería ampliable y conserva la acción de apuntarse", as
   await page.screenshot({ path: test.info().outputPath("ficha-editorial.png"), style: "nextjs-portal { display: none !important; }" });
   await page.getByRole("button", { name: "Apuntarme a este plan demo" }).click();
   await expect(page.getByRole("link", { name: /Plan demo guardado/ })).toBeVisible();
+});
+
+test("el mapa muestra resultados con fotos y ordena por cercanía", async ({ page, context }) => {
+  emptyPlaces = true;
+  await context.grantPermissions(["geolocation"]);
+  await context.setGeolocation({ latitude: 39.466, longitude: -0.3651 });
+  await enterPilot(page, "/mapa");
+  await expect(page.getByRole("button", { name: "Centrar en mi ubicación" })).toBeVisible();
+  await page.getByLabel("Ordenar locales").selectOption("distance");
+  const results = page.getByRole("region", { name: "Locales del mapa" });
+  await expect(results.getByRole("link").first()).toHaveAttribute("href", "/local/d0000000-0000-4000-8000-000000000002");
+  await expect(results.getByText("Algo distinto para descubrir", { exact: true })).toHaveCount(0);
+  await expect(results.locator("img")).toHaveCount(4);
+  await results.locator("img").evaluateAll(async (images) => { await Promise.all(images.map((image) => (image as HTMLImageElement).decode().catch(() => {}))); });
+  await results.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: test.info().outputPath("mapa-resultados.png"), style: "nextjs-portal { display: none !important; }" });
 });

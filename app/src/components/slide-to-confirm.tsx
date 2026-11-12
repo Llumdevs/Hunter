@@ -55,7 +55,7 @@ export function SlideToConfirm({ label, accessibleLabel = label, disabled = fals
         onPointerUp={onPointerUp}
         onPointerCancel={() => setProgress(0)}
         onKeyDown={onKeyDown}
-        className="absolute top-1.5 left-1.5 grid h-[52px] w-[52px] touch-none place-items-center rounded-full bg-orange text-white disabled:opacity-50"
+        className="absolute top-1.5 left-1.5 grid h-[52px] w-[52px] touch-none place-items-center rounded-full bg-violet text-white disabled:opacity-50"
         style={{ transform: `translateX(${progress * travelPx}px)` }}
       >
         <ArrowRight aria-hidden className="h-6 w-6" />

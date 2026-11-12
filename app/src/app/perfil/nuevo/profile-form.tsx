@@ -56,7 +56,7 @@ export function ProfileForm({ userId, next }: { userId: string; next: string }) 
           <input name="birthdate" type="date" required className={`${INPUT_CLASS} [color-scheme:dark]`} />
         </Field>
         <label className="flex items-start gap-3 text-sm text-muted">
-          <input name="privacy" type="checkbox" required className="mt-0.5 h-5 w-5 accent-orange" />
+          <input name="privacy" type="checkbox" required className="mt-0.5 h-5 w-5 accent-violet" />
           <span>He leído la <Link href="/privacidad" className="text-fg underline">política de privacidad</Link>.</span>
         </label>
         <PrimaryButton disabled={busy}>Continuar</PrimaryButton>

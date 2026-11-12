@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 const PRIMARY =
-  "flex h-14 w-full items-center justify-center gap-2 rounded-full bg-orange px-6 text-base font-extrabold text-night-950 " +
+  "flex h-14 w-full items-center justify-center gap-2 rounded-full bg-lime px-6 text-base font-extrabold text-night-950 " +
   "primary-action transition active:scale-[0.98] disabled:opacity-50";
 const SECONDARY =
   "glass flex h-14 w-full items-center justify-center gap-2 rounded-full px-6 text-base font-semibold disabled:opacity-50";
@@ -58,4 +58,4 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 }
 
 export const INPUT_CLASS =
-  "glass h-14 rounded-2xl px-4 text-base text-fg placeholder:text-muted focus:outline-2 focus:outline-orange";
+  "glass h-14 rounded-2xl px-4 text-base text-fg placeholder:text-muted focus:outline-2 focus:outline-violet";

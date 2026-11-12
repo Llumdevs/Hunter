@@ -51,7 +51,7 @@ export function PreferencesForm({ initial, next, onboarding }: Props) {
                 <label key={option.value}>
                   <input type="checkbox" name={group.name} value={option.value} className="peer sr-only"
                     defaultChecked={initial[group.name].includes(option.value)} />
-                  <span className="glass inline-flex h-10 items-center rounded-full px-4 text-sm font-semibold peer-checked:border-orange peer-checked:bg-orange peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-orange">
+                  <span className="glass inline-flex h-10 items-center rounded-full px-4 text-sm font-semibold peer-checked:border-violet peer-checked:bg-violet peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-violet">
                     {option.label}
                   </span>
                 </label>

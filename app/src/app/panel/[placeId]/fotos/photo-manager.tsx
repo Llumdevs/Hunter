@@ -77,7 +77,7 @@ export function PhotoManager({ placeId, placeName, photos }: Props) {
             className="text-sm text-fg file:mr-3 file:rounded-full file:border-0 file:bg-tile-sand file:px-4 file:py-2 file:font-semibold" />
         </label>
         <label className="flex items-start gap-3 text-sm">
-          <input name="rights" type="checkbox" required className="mt-0.5 h-5 w-5 accent-orange" />
+          <input name="rights" type="checkbox" required className="mt-0.5 h-5 w-5 accent-violet" />
           <span>Confirmo que el local tiene derechos para usar esta foto y que las personas que aparecen han dado su permiso.</span>
         </label>
         <PrimaryButton disabled={busy}><Upload aria-hidden className="h-5 w-5" />Subir foto</PrimaryButton>

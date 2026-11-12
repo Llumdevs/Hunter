@@ -14,8 +14,8 @@ const TABS = [
 function Tab({ href, label, Icon, active }: (typeof TABS)[number] & { active: boolean }) {
   return (
     <Link href={href} aria-current={active ? "page" : undefined}
-      className={`flex w-16 flex-col items-center gap-1 rounded-full py-2 text-[10px] font-semibold transition-colors ${active ? "text-orange" : "text-muted"}`}>
-      <Icon aria-hidden className={`h-5 w-5 ${active ? "text-orange" : ""}`} />
+      className={`flex w-16 flex-col items-center gap-1 rounded-full py-2 text-[10px] font-semibold transition-colors ${active ? "text-violet" : "text-muted"}`}>
+      <Icon aria-hidden className={`h-5 w-5 ${active ? "text-violet" : ""}`} />
       {label}
     </Link>
   );
@@ -32,7 +32,7 @@ export function TabBar() {
         className="bottom-dock fixed inset-x-0 bottom-4 z-20 mx-auto flex h-[64px] w-[calc(100%-2rem)] max-w-md items-center justify-around rounded-[32px] border border-white/10 bg-night-800/80 px-2 shadow-[0_12px_40px_#0008] backdrop-blur-2xl">
         {left.map((tab) => <Tab key={tab.href} {...tab} active={pathname === tab.href} />)}
         <Link href="/escanear" aria-label="Escanear QR"
-          className="grid h-12 w-12 place-items-center rounded-full border border-orange/30 bg-orange/15 text-orange">
+          className="grid h-12 w-12 place-items-center rounded-full border border-violet/30 bg-violet/15 text-violet">
           <ScanLine aria-hidden className="h-5 w-5" />
         </Link>
         {right.map((tab) => <Tab key={tab.href} {...tab} active={pathname === tab.href} />)}

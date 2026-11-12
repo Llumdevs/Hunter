@@ -18,7 +18,7 @@ const OFFER_ERROR_MESSAGES: Record<OfferError, string> = {
 
 type Props = { placeId: string; offerId?: string; initial?: OfferRow };
 
-const DAY_INPUT = "h-14 rounded-2xl border border-[#ece6e0] bg-day-card px-4 text-base focus:outline-2 focus:outline-orange";
+const DAY_INPUT = "h-14 rounded-2xl border border-[#ece6e0] bg-day-card px-4 text-base focus:outline-2 focus:outline-violet";
 
 export function OfferForm({ placeId, offerId, initial }: Props) {
   const router = useRouter();
@@ -63,7 +63,7 @@ export function OfferForm({ placeId, offerId, initial }: Props) {
             <label key={label} className="flex-1">
               <input type="checkbox" name="days" value={index + 1} aria-label={`Día ${label}`} className="peer sr-only"
                 defaultChecked={initial?.days_of_week.includes(index + 1) ?? true} />
-              <span className="grid h-11 place-items-center rounded-full bg-day-card font-bold peer-checked:bg-orange peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-orange">
+              <span className="grid h-11 place-items-center rounded-full bg-day-card font-bold peer-checked:bg-violet peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-violet">
                 {label}
               </span>
             </label>
@@ -74,7 +74,7 @@ export function OfferForm({ placeId, offerId, initial }: Props) {
         <input name="validUntil" type="time" defaultValue={initial?.valid_until_time?.slice(0, 5) ?? ""} className={DAY_INPUT} />
       </Field>
       <label className="flex items-center gap-3 rounded-2xl bg-day-card p-4">
-        <input name="includesAlcohol" type="checkbox" defaultChecked={initial?.includes_alcohol ?? false} className="h-5 w-5 accent-orange" />
+        <input name="includesAlcohol" type="checkbox" defaultChecked={initial?.includes_alcohol ?? false} className="h-5 w-5 accent-violet" />
         <span className="text-sm">Incluye bebida alcohólica (se mostrará un aviso de salud)</span>
       </label>
       <p className="rounded-2xl bg-tile-lime p-3 text-sm">Consejo: las ofertas que no son solo alcohol (tapa, entrada, sin cola) funcionan igual de bien.</p>

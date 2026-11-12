@@ -53,7 +53,7 @@ export function ScreenQr({ placeId, placeName, screenSecret }: Props) {
   if (failed) return <p role="alert" className="text-danger">No se puede generar el QR. Recarga la página.</p>;
   return (
     <section className="-mx-5 -my-6 flex min-h-dvh flex-1 flex-col items-center justify-center gap-6 bg-white px-6 text-center text-day-ink">
-      <p className="text-sm font-bold tracking-widest text-orange uppercase">Hunter</p>
+      <p className="text-sm font-bold tracking-widest text-violet uppercase">Hunter</p>
       <h1 className="text-4xl font-black">{placeName}</h1>
       <p className="text-lg">Escanea para hacer check-in · el código cambia cada 30 segundos</p>
       {frame && (

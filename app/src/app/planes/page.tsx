@@ -23,9 +23,9 @@ export default async function PlansPage() {
         <h2 className="text-lg font-bold">Tus prelistas reales</h2>
         {(signups ?? []).length === 0 && (
           <div className="glass flex flex-col items-center gap-3 rounded-[var(--radius-card)] p-6 text-center">
-            <Ticket aria-hidden className="h-8 w-8 text-orange" />
+            <Ticket aria-hidden className="h-8 w-8 text-violet" />
             <p className="text-muted">Aún no te has apuntado a ningún sitio esta noche.</p>
-            <Link href="/" className="font-bold text-orange-soft underline">Ver qué hay esta noche</Link>
+            <Link href="/" className="font-bold text-violet-soft underline">Ver qué hay esta noche</Link>
           </div>
         )}
         {(signups ?? []).map((signup) => {
@@ -48,7 +48,7 @@ export default async function PlansPage() {
                 </Link>
               ) : (
                 <div className="flex items-center justify-between gap-3">
-                  <Link href="/escanear" className="flex items-center gap-2 font-bold text-orange-soft">
+                  <Link href="/escanear" className="flex items-center gap-2 font-bold text-violet-soft">
                     <ScanLine aria-hidden className="h-5 w-5" />{checkin ? "Escanea de nuevo para canjear" : "Escanea el QR al llegar"}
                   </Link>
                   {!checkin && <CancelSignupButton placeId={signup.place_id} />}

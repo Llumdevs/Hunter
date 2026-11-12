@@ -42,7 +42,7 @@ export default async function PlacePanelPage({ params }: { params: Promise<{ pla
       </header>
       {place.is_demo && <DemoVenueNotice />}
 
-      <Link href={`/panel/${placeId}/compras`} className="rounded-2xl bg-orange p-4 text-center font-bold text-white">Validar compras y gestionar anulaciones</Link>
+      <Link href={`/panel/${placeId}/compras`} className="rounded-2xl bg-violet p-4 text-center font-bold text-white">Validar compras y gestionar anulaciones</Link>
 
       <section aria-labelledby="tonight" className="flex flex-col gap-2">
         <h2 id="tonight" className="text-lg font-bold">Esta noche</h2>
@@ -67,7 +67,7 @@ export default async function PlacePanelPage({ params }: { params: Promise<{ pla
 
       <DayCard>
         <SectionTitle id="offers" title="Ofertas"
-          action={<Link href={`/panel/${placeId}/ofertas/nueva`} className="text-sm font-bold text-orange">+ Nueva oferta</Link>} />
+          action={<Link href={`/panel/${placeId}/ofertas/nueva`} className="text-sm font-bold text-violet">+ Nueva oferta</Link>} />
         {(offers ?? []).map((offer) => (
           <article key={offer.id} className="flex items-center justify-between gap-3 rounded-2xl bg-day-bg p-3">
             <div>

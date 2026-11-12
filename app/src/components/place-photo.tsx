@@ -18,7 +18,7 @@ export function PlacePhoto({ path, alt, className = "", demo = false, variant = 
   return (
     <div className={`${position} overflow-hidden ${className}`}>
       <Image
-        src={path ? placePhotoUrl(publicEnv.supabaseUrl, path) : `/images/${variant}-session.webp`}
+        src={path ? placePhotoUrl(publicEnv.supabaseUrl, path) : `/images/${variant === "night" ? "night-blue" : variant === "live" ? "live-violet" : `${variant}-session`}.webp`}
         alt={path ? alt : ""}
         fill
         sizes="(max-width: 448px) 100vw, 448px"

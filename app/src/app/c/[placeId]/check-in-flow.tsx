@@ -151,7 +151,7 @@ function CheckedIn({ state, offers, coverPath, placeName, onRedeem }: CheckedInP
           <div className="flex items-center gap-3">
             <PlacePhoto path={coverPath} alt={placeName} className="h-14 w-14 flex-none rounded-2xl" />
             <div>
-              <p className="text-xs font-bold tracking-wider text-orange-soft uppercase">Oferta desbloqueada</p>
+              <p className="text-xs font-bold tracking-wider text-violet-soft uppercase">Oferta desbloqueada</p>
               <h3 className="text-lg leading-tight font-bold">{offer.title}</h3>
             </div>
           </div>

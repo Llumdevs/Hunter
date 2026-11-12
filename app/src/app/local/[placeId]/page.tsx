@@ -52,12 +52,12 @@ export default async function PlacePage({ params }: { params: Promise<{ placeId:
       </div>
       <div className="relative flex flex-col gap-6 px-6 pt-6 pb-36">
         <div className="flex flex-col gap-3 text-xs text-muted">
-          <p className="flex items-center gap-3"><Clock aria-hidden className="h-4 w-4 text-orange" />Esta noche · {place.opens_at.slice(0, 5)}–{place.closes_at.slice(0, 5)}</p>
-          <p className="flex items-center gap-3"><MapPin aria-hidden className="h-4 w-4 text-orange" />{place.zone}, Valencia</p>
-          <p className="flex items-center gap-3"><Music2 aria-hidden className="h-4 w-4 text-orange" />{labelFor(MUSIC, place.music) ?? "Música por confirmar"}<span aria-hidden className="text-white/20">/</span>{labelFor(VIBES, place.vibe) ?? "Ambiente por confirmar"}</p>
+          <p className="flex items-center gap-3"><Clock aria-hidden className="h-4 w-4 text-violet" />Esta noche · {place.opens_at.slice(0, 5)}–{place.closes_at.slice(0, 5)}</p>
+          <p className="flex items-center gap-3"><MapPin aria-hidden className="h-4 w-4 text-violet" />{place.zone}, Valencia</p>
+          <p className="flex items-center gap-3"><Music2 aria-hidden className="h-4 w-4 text-violet" />{labelFor(MUSIC, place.music) ?? "Música por confirmar"}<span aria-hidden className="text-white/20">/</span>{labelFor(VIBES, place.vibe) ?? "Ambiente por confirmar"}</p>
         </div>
         <section className="flex flex-col gap-3"><h2 className="text-lg font-extrabold">Así será tu noche</h2><p className="text-sm leading-relaxed text-muted">{demoPlace ? DEMO_EVENTS.find((event) => event.placeId === placeId)?.description : `Descubre ${place.name} en ${place.zone}. Consulta su programación, apúntate a la prelista y escanea el QR al llegar para activar las ofertas disponibles.`}</p></section>
-        <div className="flex flex-wrap gap-2 text-[11px] text-muted"><span className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-2"><Wallet aria-hidden className="h-3.5 w-3.5 text-orange" />{place.price_level} · Presupuesto</span><span className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-2"><Users aria-hidden className="h-3.5 w-3.5 text-orange" />{labelFor(AGE_BANDS, place.age_band) ?? "Público sin datos"}</span><span className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-2"><Waves aria-hidden className="h-3.5 w-3.5 text-orange" />{labelFor(VIBES, place.vibe) ?? "Sin datos"}</span></div>
+        <div className="flex flex-wrap gap-2 text-[11px] text-muted"><span className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-2"><Wallet aria-hidden className="h-3.5 w-3.5 text-violet" />{place.price_level} · Presupuesto</span><span className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-2"><Users aria-hidden className="h-3.5 w-3.5 text-violet" />{labelFor(AGE_BANDS, place.age_band) ?? "Público sin datos"}</span><span className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-2"><Waves aria-hidden className="h-3.5 w-3.5 text-violet" />{labelFor(VIBES, place.vibe) ?? "Sin datos"}</span></div>
         <PhotoGallery key={place.id} name={place.name} demo={Boolean(demoPlace)} photos={demoPlace ? (["night", "live", "terrace", "electric"] as const).map((variant) => ({ path: null, variant })) : (photos ?? []).map((photo) => ({ path: photo.storage_path }))} />
         {demoPlace && <DemoBanner />}
         {place.age_source === "venue" && place.age_band && <p className="text-center text-xs text-muted">Edad del público según el local</p>}
@@ -65,11 +65,11 @@ export default async function PlacePage({ params }: { params: Promise<{ placeId:
         {rating.success && <div className="glass flex flex-col gap-2 rounded-2xl p-4 text-sm">
           <h2 className="font-bold">Valoraciones de visitas verificadas</h2>
           <p className="text-muted">{rating.data.average !== null ? `${rating.data.average} de 5 ★ · ${rating.data.count} valoraciones` : "Aún no hay suficientes valoraciones para mostrar una media (mínimo 3)."}</p>
-          <Link href="/valoraciones" className="text-orange-soft underline">Valorar mis visitas</Link>
+          <Link href="/valoraciones" className="text-violet-soft underline">Valorar mis visitas</Link>
         </div>}
         {tonightOffers.map((offer) => (
-          <article key={offer.id} className="rounded-[22px] border border-dashed border-orange-soft/70 bg-gradient-to-br from-orange/20 to-rose/10 p-4">
-            <p className="text-[11px] font-bold tracking-wider text-orange-soft uppercase">Oferta por apuntarte</p>
+          <article key={offer.id} className="rounded-[22px] border border-dashed border-violet-soft/70 bg-gradient-to-br from-violet/20 to-rose/10 p-4">
+            <p className="text-[11px] font-bold tracking-wider text-violet-soft uppercase">Oferta por apuntarte</p>
             <h2 className="text-lg font-bold">{offer.title}</h2>
             {offer.description && <p className="text-sm text-muted">{offer.description}</p>}
             {offer.includesAlcohol && <p className="mt-1 text-xs text-muted">El consumo de alcohol perjudica la salud. Bebe con moderación.</p>}
@@ -77,7 +77,7 @@ export default async function PlacePage({ params }: { params: Promise<{ placeId:
           </article>
         ))}
         {demoPlace ? <>
-          <article className="rounded-3xl border border-dashed border-orange-soft/70 p-4"><h2 className="font-bold">{DEMO_OFFERS[placeId]}</h2><p className="text-xs text-muted">Oferta ficticia para probar el flujo. No canjeable en ningún local.</p></article>
+          <article className="rounded-3xl border border-dashed border-violet-soft/70 p-4"><h2 className="font-bold">{DEMO_OFFERS[placeId]}</h2><p className="text-xs text-muted">Oferta ficticia para probar el flujo. No canjeable en ningún local.</p></article>
           <DemoSignup placeId={placeId} price={place.price_level} />
         </> : <SignupButton price={place.price_level} placeId={placeId} signedUp={Boolean(signup)} loggedIn={Boolean(userId)} />}
       </div>

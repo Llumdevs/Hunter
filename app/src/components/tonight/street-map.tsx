@@ -5,7 +5,7 @@ import type * as Leaflet from "leaflet";
 import { Minimap, type MapPin } from "./minimap";
 
 type Props = { pins: MapPin[]; me: { lat: number; lng: number } | null; selectedId: string | null; onSelect: (id: string) => void; onPickPosition?: (lat: number, lng: number) => void };
-const COLORS = { match: "#c6f432", discover: "#ff925b", other: "#b1abc5" };
+const COLORS = { match: "#c7ff70", discover: "#a99aff", other: "#9daac8" };
 
 export function StreetMap({ pins, me, selectedId, onSelect, onPickPosition }: Props) {
   const container = useRef<HTMLDivElement>(null);
@@ -91,7 +91,7 @@ export function StreetMap({ pins, me, selectedId, onSelect, onPickPosition }: Pr
     </div>}
     {tilesFailed && !schematic && <div role="status" className="absolute inset-x-3 top-20 z-[500] rounded-2xl border border-white/20 bg-night-950 p-3 text-xs text-fg">
       <p>No se ha podido cargar el callejero. Puedes seguir usando la lista de locales o el mapa sin calles.</p>
-      <button type="button" onClick={() => setSchematic(true)} className="mt-2 min-h-10 font-bold text-orange-soft underline">Ver mapa sin calles</button>
+      <button type="button" onClick={() => setSchematic(true)} className="mt-2 min-h-10 font-bold text-violet-soft underline">Ver mapa sin calles</button>
     </div>}
   </>;
 }

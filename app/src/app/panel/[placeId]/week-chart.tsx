@@ -10,7 +10,7 @@ export function WeekChart({ nights }: { nights: NightStats[] }) {
           <div key={bar.nightDate} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
             <div className="flex h-full w-full items-end gap-0.5">
               <span className="flex-1 rounded-t-md bg-[#e6dfd8]" style={{ height: `${bar.signupsPct}%` }} />
-              <span className="flex-1 rounded-t-md bg-orange" style={{ height: `${bar.checkinsPct}%` }} />
+              <span className="flex-1 rounded-t-md bg-violet" style={{ height: `${bar.checkinsPct}%` }} />
             </div>
             <span className="text-[11px] text-muted">{bar.day}</span>
           </div>
@@ -18,7 +18,7 @@ export function WeekChart({ nights }: { nights: NightStats[] }) {
       </div>
       <div aria-hidden className="flex gap-4 text-[11px] text-muted">
         <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-[#e6dfd8]" />Apuntados</span>
-        <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-orange" />Check-ins</span>
+        <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-violet" />Check-ins</span>
       </div>
       <table className="sr-only">
         <caption>Actividad por noche</caption>

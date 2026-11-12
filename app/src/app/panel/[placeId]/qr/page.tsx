@@ -20,7 +20,7 @@ export default async function StaticQrPage({ params }: { params: Promise<{ place
   return (
     <section className="flex flex-col items-center gap-4 text-center">
       <div className="self-start print:hidden"><BackLink href={`/panel/${placeId}`}>{place.name}</BackLink></div>
-      <p className="text-sm font-bold tracking-widest text-orange uppercase">Hunter</p>
+      <p className="text-sm font-bold tracking-widest text-violet uppercase">Hunter</p>
       <h1 className="text-3xl font-extrabold">{place.name}</h1>
       {place.is_demo && <DemoVenueNotice />}
       <p className="text-muted print:text-black">Escanea para hacer check-in y desbloquear la oferta</p>

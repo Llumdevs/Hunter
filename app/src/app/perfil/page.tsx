@@ -36,7 +36,7 @@ export default async function ProfilePage() {
         <nav className="flex flex-col gap-2">
           {links.map(({ href, label, Icon }) => (
             <Link key={href} href={href} className="glass flex items-center gap-3 rounded-2xl p-4 font-semibold">
-              <Icon aria-hidden className="h-5 w-5 text-orange-soft" /><span className="flex-1">{label}</span>
+              <Icon aria-hidden className="h-5 w-5 text-violet-soft" /><span className="flex-1">{label}</span>
               <ChevronRight aria-hidden className="h-5 w-5 text-muted" />
             </Link>
           ))}

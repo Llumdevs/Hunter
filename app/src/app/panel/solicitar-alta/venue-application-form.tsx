@@ -9,7 +9,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { onboardingError, onboardingResultSchema, VENUE_KINDS, venueApplicationDetailsSchema } from "@/lib/venue/onboarding";
 import { WEEKDAY_LABELS } from "@/lib/venue/weekdays";
 
-const INPUT = "min-h-12 rounded-2xl border border-[#ece6e0] bg-day-card px-4 py-3 text-fg focus:outline-2 focus:outline-orange";
+const INPUT = "min-h-12 rounded-2xl border border-[#ece6e0] bg-day-card px-4 py-3 text-fg focus:outline-2 focus:outline-violet";
 
 export function VenueApplicationForm() {
   const router = useRouter();

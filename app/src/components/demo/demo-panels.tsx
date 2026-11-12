@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useDemo } from "./provider";
 import { DEMO_EVENTS, DEMO_PLACES } from "@/lib/demo/catalog";
 import { tonightDate } from "@/lib/tonight/night";
+import type { Score } from "@/lib/tonight/recommend";
+import type { TonightPlaceRow } from "@/lib/tonight/load";
+import { VenueResult } from "@/components/tonight/venue-result";
 import { EventPoster } from "./event-poster";
 import { demoPoints } from "@/lib/demo/state";
 
@@ -11,15 +14,18 @@ export function DemoBanner() {
   return <p className="rounded-2xl border border-white/10 bg-white/[.025] px-3 py-2 text-[11px] leading-relaxed text-muted">Demo · Locales y ofertas ficticios. Imágenes de ambiente generadas con IA.</p>;
 }
 
-export function DemoEvents({ placeIds, hideHeading = false }: { placeIds?: string[]; hideHeading?: boolean }) {
+export function DemoEvents({ placeIds, hideHeading = false, ranked, me = null }: { placeIds?: string[]; hideHeading?: boolean; ranked?: { place: TonightPlaceRow; score: Score; matched: boolean }[]; me?: { lat: number; lng: number } | null }) {
   const now = new Date(`${tonightDate()}T12:00:00Z`);
   const day = new Intl.DateTimeFormat("es-ES", { day: "2-digit", timeZone: "Europe/Madrid" }).format(now);
   const month = new Intl.DateTimeFormat("es-ES", { month: "short", timeZone: "Europe/Madrid" }).format(now).replace(".", "");
-  const events = DEMO_EVENTS.filter((event) => !placeIds || placeIds.includes(event.placeId));
+  const events = ranked ? ranked.flatMap((item) => DEMO_EVENTS.filter((event) => event.placeId === item.place.id)) : DEMO_EVENTS.filter((event) => !placeIds || placeIds.includes(event.placeId));
   if (!events.length) return null;
   return <section aria-label="Eventos simulados" className="flex flex-col gap-4">
-    {!hideHeading && <div className="flex items-baseline justify-between gap-3"><h2 className="text-lg font-extrabold">En el radar</h2><span className="text-[10px] font-semibold text-orange-soft">Esta noche · Demo</span></div>}
-    {events.map((event) => <EventPoster key={event.placeId} event={event} index={DEMO_EVENTS.indexOf(event)} day={day} month={month} />)}
+    {!hideHeading && <div className="flex items-baseline justify-between gap-3"><h2 className="text-lg font-extrabold">En el radar</h2><span className="text-[10px] font-semibold text-violet-soft">Esta noche · Demo</span></div>}
+    {events.map((event, index) => {
+      const item = ranked?.find((item) => item.place.id === event.placeId);
+      return item && index > 0 ? <VenueResult key={event.placeId} {...item} me={me} event={event} /> : <EventPoster key={event.placeId} event={event} index={DEMO_EVENTS.indexOf(event)} day={day} month={month} score={item?.score} matched={item?.matched} />;
+    })}
   </section>;
 }
 
@@ -28,8 +34,8 @@ export function DemoSignup({ placeId, price }: { placeId: string; price?: string
   const selected = state.plans.some((plan) => plan.placeId === placeId);
   return <div className="booking-bar fixed inset-x-0 bottom-0 z-10 mx-auto flex w-full max-w-md items-center gap-5 px-6 pt-4 pb-6">
     <div className="flex-none"><p className="text-[10px] text-muted">Presupuesto</p><b className="text-2xl">{price ?? "—"}</b></div>
-    {selected ? <Link href="/planes" className="flex min-h-14 flex-1 items-center justify-center rounded-full bg-orange px-4 text-xs font-bold text-night-950">✓ Plan demo guardado · ver Mis planes</Link>
-      : <button type="button" disabled={!ready} onClick={() => update((current) => ({ ...current, plans: [...current.plans.filter((plan) => plan.placeId !== placeId), { placeId, checkedIn: false, purchaseValidated: false, rating: null }] }))} className="flex min-h-14 flex-1 items-center justify-center rounded-full bg-orange p-3 text-xs font-bold text-night-950 disabled:opacity-50">Apuntarme a este plan demo</button>}
+    {selected ? <Link href="/planes" className="flex min-h-14 flex-1 items-center justify-center rounded-full bg-violet px-4 text-xs font-bold text-night-950">✓ Plan demo guardado · ver Mis planes</Link>
+      : <button type="button" disabled={!ready} onClick={() => update((current) => ({ ...current, plans: [...current.plans.filter((plan) => plan.placeId !== placeId), { placeId, checkedIn: false, purchaseValidated: false, rating: null }] }))} className="flex min-h-14 flex-1 items-center justify-center rounded-full bg-violet p-3 text-xs font-bold text-night-950 disabled:opacity-50">Apuntarme a este plan demo</button>}
   </div>;
 }
 
@@ -49,7 +55,7 @@ export function DemoPlans() {
           {plan.rating === null ? <label className="text-sm">Valorar la visita demo<select aria-label={`Valorar ${event.title}`} defaultValue="" onChange={(e) => { const rating = Number(e.target.value); update((current) => ({ ...current, plans: current.plans.map((p) => p.placeId === plan.placeId ? { ...p, rating } : p) })); }} className="mt-2 w-full rounded-xl border border-white/20 bg-night-900 p-3"><option value="" disabled>Elige una puntuación</option>{[5, 4, 3, 2, 1].map((rating) => <option key={rating} value={rating}>{rating} de 5 ★</option>)}</select></label>
             : <p className="text-sm text-lime">Tu valoración demo: {plan.rating} de 5 ★</p>}
         </> : <button type="button" onClick={() => update((current) => ({ ...current, plans: current.plans.map((p) => p.placeId === plan.placeId ? { ...p, checkedIn: true } : p) }))} className="min-h-11 rounded-full bg-lime px-4 font-bold text-night-950">Simular check-in</button>}
-        {plan.purchaseValidated ? <p className="text-lime">Compra simulada · +10 puntos demo</p> : <button type="button" onClick={() => update((current) => ({ ...current, plans: current.plans.map((p) => p.placeId === plan.placeId ? { ...p, purchaseValidated: true } : p) }))} className="min-h-11 rounded-full bg-orange p-3 font-bold">Simular compra validada</button>}
+        {plan.purchaseValidated ? <p className="text-lime">Compra simulada · +10 puntos demo</p> : <button type="button" onClick={() => update((current) => ({ ...current, plans: current.plans.map((p) => p.placeId === plan.placeId ? { ...p, purchaseValidated: true } : p) }))} className="min-h-11 rounded-full bg-violet p-3 font-bold">Simular compra validada</button>}
         <button type="button" onClick={() => update((current) => ({ ...current, plans: current.plans.filter((p) => p.placeId !== plan.placeId) }))} className="min-h-11 text-sm text-muted underline">Quitar plan demo</button>
       </article>;
     })}
@@ -65,8 +71,8 @@ export function DemoControls() {
     <p className="text-xs text-muted">Estos puntos no se suman a los del perfil real. Reiniciar la demo no modifica tu cuenta ni los datos de Supabase.</p>
     {storageFailed && <p role="alert" className="text-sm text-rose">El navegador no permite guardar la demo. Puedes probarla, pero los cambios se perderán al recargar.</p>}
     <button type="button" disabled={!ready} onClick={reset} className="glass min-h-14 rounded-full px-5 font-bold">Reiniciar datos demo</button>
-    <Link href="/mapa" className="min-h-11 text-orange-soft underline">Abrir mapa</Link>
-    <Link href="/ranking" className="min-h-11 text-orange-soft underline">Probar ranking y premio ficticio</Link>
+    <Link href="/mapa" className="min-h-11 text-violet-soft underline">Abrir mapa</Link>
+    <Link href="/ranking" className="min-h-11 text-violet-soft underline">Probar ranking y premio ficticio</Link>
     <DemoEvents />
   </section>;
 }

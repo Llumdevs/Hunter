@@ -49,7 +49,7 @@ export function SideMenu() {
   return <>
     <header className="discovery-header mb-4 flex h-11 items-center justify-between">
       <button ref={trigger} type="button" aria-label="Abrir menú" aria-haspopup="dialog" onClick={open} className="grid h-11 w-11 place-items-center rounded-full"><Menu aria-hidden className="h-5 w-5" /></button>
-      <Link href="/mapa" className="flex min-h-11 items-center gap-2 text-xs font-semibold"><MapPin aria-hidden className="h-4 w-4 text-orange" />Valencia<ChevronDown aria-hidden className="h-3 w-3 text-muted" /></Link>
+      <Link href="/mapa" className="flex min-h-11 items-center gap-2 text-xs font-semibold"><MapPin aria-hidden className="h-4 w-4 text-violet" />Valencia<ChevronDown aria-hidden className="h-3 w-3 text-muted" /></Link>
       <Link href="/compras" aria-label="Mi QR de compra" className="grid h-11 w-11 place-items-center rounded-full"><QrCode aria-hidden className="h-5 w-5" /></Link>
     </header>
     <dialog ref={dialog} aria-labelledby="side-menu-title" onCancel={(event) => { event.preventDefault(); close(); }} onClose={() => { document.body.style.overflow = previousOverflow.current; }}
@@ -58,11 +58,11 @@ export function SideMenu() {
       <div className="flex h-full flex-col gap-6 overflow-y-auto p-6">
         <div className="flex items-center justify-between"><h2 id="side-menu-title" className="text-xl font-extrabold">Tu Hunter</h2><button type="button" onClick={close} aria-label="Cerrar menú" className="grid h-11 w-11 place-items-center rounded-full border border-white/15"><X aria-hidden className="h-5 w-5" /></button></div>
         <nav aria-label="Opciones de cuenta" className="flex flex-col gap-2">
-          {LINKS.map(({ href, label, Icon }) => <Link key={href} href={href} onClick={close} className="glass flex min-h-14 items-center gap-3 rounded-2xl px-4"><Icon aria-hidden className="h-5 w-5 text-orange-soft" />{label}</Link>)}
+          {LINKS.map(({ href, label, Icon }) => <Link key={href} href={href} onClick={close} className="glass flex min-h-14 items-center gap-3 rounded-2xl px-4"><Icon aria-hidden className="h-5 w-5 text-violet-soft" />{label}</Link>)}
         </nav>
         <div className="mt-auto flex flex-col gap-3 border-t border-white/15 pt-5">
           <p className="text-xs text-muted">Si estás probando como invitado, cerrar sesión te hará perder el acceso a esa cuenta.</p>
-          <button type="button" disabled={busy} onClick={logOut} className="flex min-h-12 items-center gap-3 font-semibold text-orange-soft"><LogOut aria-hidden className="h-5 w-5" />{busy ? "Saliendo…" : "Salir"}</button>
+          <button type="button" disabled={busy} onClick={logOut} className="flex min-h-12 items-center gap-3 font-semibold text-violet-soft"><LogOut aria-hidden className="h-5 w-5" />{busy ? "Saliendo…" : "Salir"}</button>
           {error && <p role="alert" className="text-sm text-rose">{error}</p>}
         </div>
       </div>

@@ -4,7 +4,7 @@ import { projectPoints } from "@/lib/tonight/project";
 export type MapPin = { id: string; name: string; lat: number; lng: number; tone: "match" | "discover" | "other" };
 type Props = { pins: MapPin[]; me: { lat: number; lng: number } | null; width: number; height: number; onSelect?: (id: string) => void; selectedId?: string | null; interactive?: boolean };
 
-const TONE = { match: "fill-lime", discover: "fill-orange", other: "fill-ink-muted" } as const;
+const TONE = { match: "fill-lime", discover: "fill-violet", other: "fill-ink-muted" } as const;
 const PADDING = 22;
 
 // Mapa esquemático (posiciones reales, sin calles) hasta conectar un proveedor de teselas.
@@ -26,7 +26,7 @@ export function Minimap({ pins, me, width, height, onSelect, selectedId, interac
         </>;
         return !interactive ? <g key={pin.id}>{circles}</g> : onSelect ? (
           <g key={pin.id} role="button" tabIndex={0} aria-label={pin.name} aria-pressed={selectedId === pin.id}
-            className="cursor-pointer outline-orange" onClick={() => onSelect(pin.id)}
+            className="cursor-pointer outline-violet" onClick={() => onSelect(pin.id)}
             onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(pin.id); } }}>
             {circles}
           </g>
@@ -46,7 +46,7 @@ export function MapLegend() {
   return (
     <div className="flex gap-4 text-[11px] text-muted">
       <span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-lime" />Encaja contigo</span>
-      <span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-orange" />Para descubrir</span>
+      <span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-violet" />Para descubrir</span>
       <span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-sky" />Tú</span>
     </div>
   );
