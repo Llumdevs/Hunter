@@ -1,5 +1,7 @@
 # Hunter · app
 
+Skin visual y recursos: [`../docs/skin-nocturna.md`](../docs/skin-nocturna.md).
+
 ## Compras y ranking mensual
 
 Reglas, límites, demo y activación: [`../docs/compras-ranking.md`](../docs/compras-ranking.md).

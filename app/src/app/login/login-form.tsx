@@ -82,10 +82,10 @@ export function LoginForm({ next, initialError = null }: { next: string; initial
   }
 
   return (
-    <section className="flex flex-1 flex-col justify-center gap-8">
+    <section className="login-stage flex flex-1 flex-col justify-center gap-8 py-8">
       <header className="flex flex-col gap-2">
         <HunterLogo className="h-8 text-fg" />
-        <h1 className="text-[32px] leading-tight font-extrabold uppercase">Entra en Hunter</h1>
+        <p className="eyebrow mt-8 text-lime">Tu noche empieza aquí</p><h1 className="text-[42px] leading-none font-black tracking-tight">Entra en Hunter</h1>
         <p className="text-muted">Sin contraseñas: te enviamos un enlace para entrar.</p>
       </header>
       {step.name === "email" ? (

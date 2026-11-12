@@ -1,4 +1,4 @@
-import { ScanLine } from "lucide-react";
+import { ArrowUpRight, ScanLine } from "lucide-react";
 import Link from "next/link";
 import { TonightView } from "./tonight-view";
 import { HunterLogo } from "@/components/logo";
@@ -25,28 +25,19 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 }
 
 function Welcome() {
-  return (
-    <section className="relative -mx-5 -my-6 flex min-h-dvh flex-col justify-end overflow-hidden px-6 pb-10">
-      {/* Marcador: aquí irá una foto de ambiente con derechos de uso. */}
-      <div aria-hidden className="photo-placeholder absolute inset-0" />
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-transparent via-night-950/60 to-night-950" />
-      <HunterLogo className="absolute top-8 left-6 h-8 text-fg" />
-      <div aria-hidden className="absolute top-24 right-8 grid h-20 w-20 -rotate-12 place-items-center rounded-full border-2 border-lime bg-night-950/40 text-lg font-black text-lime">
-        +18
-      </div>
-      <div className="relative flex flex-col gap-5">
-        <h1 className="text-[40px] leading-none font-black tracking-tight">
-          Sabe dónde vas<br /><span className="text-orange">antes de ir.</span>
-        </h1>
-        <p className="text-muted">
-          Qué música suena, qué gente va y cómo de lleno está esta noche. Apúntate, escanea al llegar y llévate la oferta.
-        </p>
-        <LinkButton href="/login?next=%2F">Empezar</LinkButton>
-        <Link href="/escanear" className="flex items-center justify-center gap-2 text-sm font-semibold">
-          <ScanLine aria-hidden className="h-4 w-4" />Ya estoy en el local: escanear el QR
-        </Link>
-        <Link href="/locales" className="text-center text-sm text-muted underline">¿Tienes un local? Entra en tu panel</Link>
-      </div>
-    </section>
-  );
+  return <section className="welcome-hero relative -mx-5 -my-6 flex min-h-dvh flex-col overflow-hidden px-6 pt-8 pb-8">
+    <div aria-hidden className="welcome-photo" />
+    <header className="flex items-center justify-between"><HunterLogo className="h-8 text-fg" /><span className="rounded-full border border-white/30 px-3 py-1.5 text-xs font-bold">+18</span></header>
+    <div className="mt-10 flex items-center gap-2" aria-hidden><span className="h-1 w-14 rounded-full bg-lime" /></div>
+    <p className="eyebrow mt-5 text-white/80">Valencia / After dark</p>
+    <div className="min-h-32 flex-1" />
+    <div className="relative flex flex-col gap-5">
+      <div><span className="night-label">Encuentra tu frecuencia</span><h1 className="mt-4 text-[clamp(44px,12vw,58px)] leading-[.97] font-black tracking-[-.065em]">Sabe dónde vas<br /><span className="outline-type">antes de ir.</span></h1></div>
+      <p className="max-w-xs text-sm leading-relaxed text-muted">Tu música. Tu ambiente. Tu próxima gran noche. Descubre lo que encaja contigo y sal con un plan.</p>
+      <div className="glass flex items-center justify-between rounded-3xl px-4 py-3"><span className="text-xs text-muted">Explora. Elige. Vívelo.</span><ArrowUpRight aria-hidden className="h-5 w-5 text-lime" /></div>
+      <LinkButton href="/login?next=%2F">Empezar <ArrowUpRight aria-hidden className="ml-auto h-5 w-5" /></LinkButton>
+      <Link href="/escanear" className="flex min-h-11 items-center justify-center gap-2 text-xs font-semibold"><ScanLine aria-hidden className="h-4 w-4 text-lime" />Ya estoy en el local: escanear el QR</Link>
+      <Link href="/locales" className="text-center text-xs text-muted underline underline-offset-4">¿Tienes un local? Entra en tu panel</Link>
+    </div>
+  </section>;
 }

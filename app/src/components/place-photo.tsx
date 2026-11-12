@@ -2,13 +2,31 @@ import Image from "next/image";
 import { publicEnv } from "@/lib/env";
 import { placePhotoUrl } from "@/lib/venue/photo-file";
 
-// Foto del local o, si aún no tiene, el degradado de marcador.
-export function PlacePhoto({ path, alt, className = "" }: { path: string | null; alt: string; className?: string }) {
-  if (!path) return <div aria-hidden className={`photo-placeholder ${className}`} />;
+type Props = {
+  path: string | null;
+  alt: string;
+  className?: string;
+  demo?: boolean;
+  variant?: "night" | "live";
+  eager?: boolean;
+};
+
+// Fotos reales tienen prioridad. Imágenes editoriales IA solo en locales demo.
+export function PlacePhoto({ path, alt, className = "", demo = false, variant = "night", eager = false }: Props) {
+  const position = className.split(" ").includes("absolute") ? "" : "relative";
+  if (!path && !demo) return <div aria-hidden className={`photo-placeholder ${className}`} />;
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      {/* unoptimized: Supabase local está en una IP privada y el optimizador de Next no la sirve. */}
-      <Image src={placePhotoUrl(publicEnv.supabaseUrl, path)} alt={alt} fill unoptimized className="object-cover" />
+    <div className={`${position} overflow-hidden ${className}`}>
+      <Image
+        src={path ? placePhotoUrl(publicEnv.supabaseUrl, path) : `/images/${variant}-session.webp`}
+        alt={path ? alt : ""}
+        fill
+        sizes="(max-width: 448px) 100vw, 448px"
+        loading={eager ? "eager" : "lazy"}
+        // Supabase local está en una IP privada y el optimizador no la sirve.
+        unoptimized={Boolean(path)}
+        className="object-cover"
+      />
     </div>
   );
 }

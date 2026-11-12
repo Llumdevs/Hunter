@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 const PRIMARY =
-  "flex h-14 w-full items-center justify-center gap-2 rounded-full bg-orange px-6 text-base font-bold text-white " +
-  "shadow-[0_14px_30px_-10px_rgb(255_106_31/0.8)] transition active:scale-[0.98] disabled:opacity-50";
+  "flex h-14 w-full items-center justify-center gap-2 rounded-full bg-lime px-6 text-base font-extrabold text-night-950 " +
+  "primary-action transition active:scale-[0.98] disabled:opacity-50";
 const SECONDARY =
   "glass flex h-14 w-full items-center justify-center gap-2 rounded-full px-6 text-base font-semibold disabled:opacity-50";
 

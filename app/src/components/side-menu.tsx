@@ -48,9 +48,9 @@ export function SideMenu() {
   }
 
   return <>
-    <header className="mb-5 flex items-center justify-between gap-4">
+    <header className="mb-6 flex items-center justify-between gap-4 border-b border-white/10 pb-5">
       <Link href="/" aria-label="Hunter · inicio"><HunterLogo className="h-7 text-fg" /></Link>
-      <button ref={trigger} type="button" aria-label="Abrir menú" aria-haspopup="dialog" onClick={open} className="glass grid h-11 w-11 place-items-center rounded-full">
+      <button ref={trigger} type="button" aria-label="Abrir menú" aria-haspopup="dialog" onClick={open} className="glass grid h-11 w-11 place-items-center rounded-2xl">
         <Menu aria-hidden className="h-5 w-5" />
       </button>
     </header>

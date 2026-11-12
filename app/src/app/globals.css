@@ -1,125 +1,108 @@
 @import "tailwindcss";
 
-/* Sistema visual de Hunter (design/mocks.html).
-   Modo noche: app del usuario. Modo día (.theme-day): panel del local. */
+/* Hunter / After dark. Carbón, cristal ahumado y señal neón. */
 @theme {
   --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-
-  --color-night-950: #0f0818;
-  --color-night-900: #170d24;
-  --color-night-800: #22143a;
-  --color-night-700: #33205a;
-  --color-ink: #f7f2fb;
-  --color-ink-muted: #b8a9c9;
-  --color-orange: #ff6a1f;
-  --color-orange-soft: #ff8a4c;
-  --color-lime: #c6f432;
-  --color-sky: #8cc8ff;
-  --color-rose: #ff5c9a;
-
-  --color-day-bg: #f5f1ed;
+  --color-night-950: #080a09;
+  --color-night-900: #101311;
+  --color-night-800: #1b201c;
+  --color-night-700: #2c352d;
+  --color-ink: #f5f6ec;
+  --color-ink-muted: #a8afa5;
+  --color-orange: #ff6a35;
+  --color-orange-soft: #ffa076;
+  --color-lime: #d6ff3f;
+  --color-sky: #8ce2d0;
+  --color-rose: #ff8baf;
+  --color-day-bg: #f0f0e8;
   --color-day-card: #ffffff;
-  --color-day-ink: #1c1822;
-  --color-day-muted: #7c7585;
-  --color-tile-lime: #eef8cf;
-  --color-tile-sky: #dfeaf8;
-  --color-tile-sand: #fff0d3;
-  --color-tile-rose: #fde3ec;
-
-  --radius-card: 28px;
-  --radius-tile: 16px;
+  --color-day-ink: #172018;
+  --color-day-muted: #626b60;
+  --color-tile-lime: #e3efbd;
+  --color-tile-sky: #dcebe5;
+  --color-tile-sand: #f4e7d5;
+  --color-tile-rose: #f2dfe1;
+  --radius-card: 32px;
+  --radius-tile: 20px;
 }
-
-/* Colores semánticos: cambian con el tema, así los componentes sirven en noche y en día. */
 @theme inline {
   --color-fg: var(--fg);
   --color-muted: var(--fg-muted);
 }
-
 :root {
   --fg: var(--color-ink);
   --fg-muted: var(--color-ink-muted);
-  --surface: rgb(255 255 255 / 0.07);
-  --surface-line: rgb(255 255 255 / 0.13);
+  --surface: linear-gradient(145deg, rgb(255 255 255 / .075), rgb(255 255 255 / .025));
+  --surface-line: rgb(227 242 214 / .14);
+  color-scheme: dark;
 }
-
 .theme-day {
   --fg: var(--color-day-ink);
   --fg-muted: var(--color-day-muted);
   --surface: var(--color-day-card);
-  --surface-line: #ece6e0;
+  --surface-line: #dce1d6;
+  color-scheme: light;
 }
-
 @layer base {
   body {
     min-height: 100dvh;
     color: var(--fg);
-    background:
-      radial-gradient(120% 50% at 80% 0%, #3a1f63 0%, transparent 60%),
-      radial-gradient(90% 45% at 0% 100%, #4a1840 0%, transparent 60%),
-      var(--color-night-900);
+    background: radial-gradient(ellipse at 100% 0%, #222d1c66, transparent 45%), #080a09;
     background-attachment: fixed;
   }
+  button, a, input, select, textarea, summary { -webkit-tap-highlight-color: transparent; }
+  button:not(:disabled), summary { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--color-lime); outline-offset: 4px; }
+  ::selection { color: #080a09; background: #d6ff3f; }
+  h1, h2, h3 { text-wrap: balance; letter-spacing: -.04em; }
+  input, textarea, select { transition: border-color .18s, box-shadow .18s; }
+  input:focus, textarea:focus, select:focus { border-color: #d6ff3f88; }
+  input[type=checkbox] { accent-color: var(--color-lime); }
 }
-
 @layer components {
-  /* Superficie de cristal del modo noche */
   .glass {
     background: var(--surface);
     border: 1px solid var(--surface-line);
-    backdrop-filter: blur(14px);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .035);
+    backdrop-filter: blur(22px);
   }
-
-  /* Marcador de foto hasta tener fotos reales con permiso de cada local */
   .photo-placeholder {
-    background:
-      radial-gradient(60% 70% at 30% 30%, #ff5c9a 0%, transparent 60%),
-      radial-gradient(60% 60% at 80% 70%, #6b3cff 0%, transparent 60%),
-      radial-gradient(40% 40% at 60% 20%, #ffb36b 0%, transparent 70%),
-      #2a0f3a;
+    background: radial-gradient(ellipse at 25% 100%, #b7df3650, transparent 55%), repeating-linear-gradient(115deg, transparent 0 34px, #ffffff04 35px 36px), #1d271d;
   }
-
-  .theme-day {
-    color: var(--fg);
-    background: var(--color-day-bg);
-  }
-
-  /* Fuera del contenido del panel tampoco debe verse el fondo de noche. */
-  body:has(.theme-day) {
-    background: var(--color-day-bg);
-  }
+  .eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+  .outline-type { color: transparent; -webkit-text-stroke: 1px #dbe3ce; }
+  .night-label { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #d6ff3f44; border-radius: 99px; padding: 8px 12px; background: #12190fcc; color: #d6ff3f; font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; backdrop-filter: blur(16px); }
+  .night-label::before { content: ""; width: 5px; height: 5px; background: currentColor; border-radius: 50%; box-shadow: 0 0 12px currentColor; }
+  .welcome-hero { isolation: isolate; background: #111710; }
+  .welcome-hero::after { content: ""; pointer-events: none; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, #080a0930, #080a0900 25%, #080a0955 45%, #080a09 78%); }
+  .welcome-photo { position: absolute; inset: 0 0 23%; z-index: -2; background: url('/images/night-session.webp') center / cover; }
+  .primary-action { box-shadow: 0 6px 28px #d6ff3f18, inset 0 1px #ffffff77; }
+  .venue-poster { border-radius: 38px 38px 30px 30px; background: #172017; box-shadow: 0 16px 30px #0003; transition: transform .25s, border-color .25s; }
+  .venue-poster:hover { transform: translateY(-3px); border-color: #d6ff3f66; }
+  .venue-poster:active { transform: scale(.985); }
+  .poster-photo { transition: transform .6s; }
+  .venue-poster:hover .poster-photo { transform: scale(1.04); }
+  .login-stage { position: relative; isolation: isolate; }
+  .login-stage::before { content: ""; position: absolute; z-index: -1; inset: -24px -20px 35%; background: linear-gradient(180deg, #080a0933, #080a09), url('/images/live-session.webp') center / cover; opacity: .65; }
+  .theme-day { color: var(--fg); background: var(--color-day-bg); }
+  body:has(.theme-day) { background: var(--color-day-bg); }
 }
-
-/* Pantalla de canje: el fondo se mueve, una captura no sirve. */
 @keyframes redemption-pulse {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-
 .redemption-live {
-  background: linear-gradient(130deg, #c6f432, #ffb36b 35%, #ff6a1f 55%, #ff5c9a 80%, #c6f432);
-  background-size: 300% 300%;
-  animation: redemption-pulse 5s linear infinite;
+  background: linear-gradient(130deg, #d6ff3f, #ffb36b 35%, #ff6a35 55%, #ff8baf 80%, #d6ff3f);
+  background-size: 300% 300%; animation: redemption-pulse 5s linear infinite;
 }
-
 @media (prefers-reduced-motion: reduce) {
   .redemption-live { animation-duration: 14s; }
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0s !important; }
 }
-
-@media print {
-  body { background: #fff; color: #000; }
-}
-
-/* Mantener el deslizamiento nativo sin la barra de escritorio del navegador. */
-.horizontal-carousel {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  scroll-snap-type: x proximity;
-  scroll-padding-inline: 1.25rem;
-}
-.horizontal-carousel::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+@media print { body { background: #fff; color: #000; } }
+.horizontal-carousel { scrollbar-width: none; -ms-overflow-style: none; scroll-snap-type: x proximity; scroll-padding-inline: 1.25rem; }
+.horizontal-carousel::-webkit-scrollbar { display: none; width: 0; height: 0; }
+@supports (padding: env(safe-area-inset-bottom)) {
+  .bottom-dock { bottom: max(16px, env(safe-area-inset-bottom)); }
 }

@@ -6,13 +6,13 @@ import { DEMO_EVENTS, DEMO_PLACES } from "@/lib/demo/catalog";
 import { demoPoints } from "@/lib/demo/state";
 
 export function DemoBanner() {
-  return <p className="rounded-2xl border border-lime/30 bg-lime/10 p-3 text-xs text-lime">Demo · Locales, eventos y ofertas simulados en Valencia. No son reservas ni promociones reales.</p>;
+  return <p className="rounded-2xl border border-white/10 bg-white/[.025] px-3 py-2 text-[11px] leading-relaxed text-muted">Demo · Locales, eventos y ofertas simulados en Valencia. Imágenes de ambiente generadas con IA. No son reservas ni promociones reales.</p>;
 }
 
 export function DemoEvents() {
   return <section aria-label="Eventos simulados" className="flex flex-col gap-3">
     <h2 className="text-lg font-bold">Eventos de prueba esta noche</h2>
-    {DEMO_EVENTS.map((event) => <Link key={event.placeId} href={`/local/${event.placeId}`} className="glass flex flex-col gap-2 rounded-3xl p-4">
+    {DEMO_EVENTS.map((event) => <Link key={event.placeId} href={`/local/${event.placeId}`} className="glass flex flex-col gap-2 rounded-[28px] p-5">
       <div className="flex items-center justify-between gap-3"><h3 className="font-bold">{event.title}</h3><span className="text-xs text-lime">Demo · {event.time}</span></div>
       <p className="text-sm text-muted">{event.description}</p>
     </Link>)}

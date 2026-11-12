@@ -27,7 +27,7 @@ export default async function ProfilePage() {
     <AppShell>
       <section className="flex flex-col gap-6">
         <header className="flex items-center gap-4">
-          <span aria-hidden className="h-16 w-16 rounded-full border-2 border-white/40 bg-gradient-to-br from-orange-soft to-[#b05cff]" />
+          <span aria-hidden className="h-16 w-16 rounded-full border border-lime/50 bg-[radial-gradient(circle_at_30%_20%,#d6ff3f,#26321b_65%)] shadow-[0_0_25px_#d6ff3f18]" />
           <div>
             <p className="text-sm text-muted">Tu perfil</p>
             <h1 className="text-2xl font-extrabold">{profile?.display_name}</h1>
