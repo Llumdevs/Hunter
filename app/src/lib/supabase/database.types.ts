@@ -1,4 +1,3 @@
-
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -478,6 +477,9 @@ isOneToOne: false
             }[]
                            },
 "place_rating_summary":
+{ Args: { "p_place": string }; Returns: Json
+                           },
+"public_place":
 { Args: { "p_place": string }; Returns: Json
                            },
 "purchase_venues":

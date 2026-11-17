@@ -22,6 +22,8 @@ const purchaseId = "71000000-0000-4000-8000-000000000001";
 const rewardRules = { purchase_points: 10, daily_purchase_limit: 3, referral_points: 20, monthly_referral_limit: 5, token_ttl_seconds: 300, timezone: "Europe/Madrid", prize: { title: "Dos entradas · Ejemplo", description: "Premio ficticio, sin patrocinador." } };
 let mockSignups: { place_id: string; places: { name: string; zone: string; address: string; cities: { name: string } } }[] = [];
 let emptyPlaces = false;
+let closedPlace = false;
+let publicPlaceError = false;
 let demoVenueCreated = false;
 let venueAdmin = false;
 const demoVenueId = "70000000-0000-4000-8000-000000000001";
@@ -88,6 +90,10 @@ test.beforeAll(async () => {
       res.end("[]");
     } else if (url.pathname === "/rest/v1/user_preferences") {
       res.end(JSON.stringify([{ music: ["house"], vibe: ["bailar"], price: [], age_bands: [] }]));
+    } else if (url.pathname === "/rest/v1/rpc/public_place") {
+      if (publicPlaceError) { res.writeHead(503).end(JSON.stringify({ message: "Fixture unavailable" })); return; }
+      const place = testPlaces.find(p => p.id === body.p_place);
+      res.end(JSON.stringify(place ? { ...place, address: "Calle de prueba", city: "Valencia", timezone: "Europe/Madrid", is_open: !closedPlace, accepting_signups: !closedPlace, opening_hours: [{ weekday: 5, opens_at: "23:00", closes_at: "06:00" }], photos: [] } : null));
     } else if (url.pathname === "/rest/v1/rpc/tonight_places") {
       res.end(JSON.stringify(emptyPlaces ? [] : testPlaces));
     } else if (url.pathname === "/rest/v1/rpc/recommendation_settings") {
@@ -177,6 +183,7 @@ test.beforeAll(async () => {
 test.afterAll(async () => { await new Promise<void>((resolve) => server.close(() => resolve())); });
 test.beforeEach(async ({ context }) => {
   challenge = ""; callback = ""; existingProfile = false; deliveryError = false; guestDisabled = false; guestSignups = 0; mockCity = null; lastFeedback = ""; mockRating = null; referralClaimed = false; rankAlias = null; rankOptin = false; purchaseCancelled = false; purchaseRecorded = false; emptyPlaces = false;
+  closedPlace = false; publicPlaceError = false;
   mockSignups = []; demoVenueCreated = false; venueAdmin = false; venueApplications = [];
   demoVenueOffers = [{ id: "70000000-0000-4000-8000-000000000003", place_id: demoVenueId, title: "Tapa de bienvenida · Demo", description: "Oferta de ejemplo", includes_alcohol: false, days_of_week: [1, 2, 3, 4, 5, 6, 7], valid_until_time: null, is_active: true }];
   // Leaflet es real; solo se aíslan las imágenes externas del callejero.
@@ -401,7 +408,7 @@ test("cerrar sesión desde el menú vuelve a la portada", async ({ page }) => {
   await enterPilot(page, "/perfil");
   await page.getByRole("button", { name: "Abrir menú" }).click();
   await page.getByRole("button", { name: "Salir", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Empezar", exact: true })).toBeVisible();
+  await expect(page.getByText("Explora Valencia sin cuenta. Entra cuando quieras guardar un plan o personalizar tus gustos.")).toBeVisible();
 });
 
 test("si el callejero falla sigue disponible un mapa sin calles con selección", async ({ page, context }) => {
@@ -584,7 +591,7 @@ test("la búsqueda y las categorías filtran los eventos fotográficos", async (
 });
 
 test("la introducción permite cambiar de paso y continúa al acceso", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/bienvenida");
   await page.getByRole("tab", { name: /2\. Haz/ }).click();
   await expect(page.getByRole("tabpanel")).toContainText("Haz que la noche sea tuya");
   await page.keyboard.press("ArrowDown");
@@ -633,7 +640,7 @@ test("el mapa muestra resultados con fotos y ordena por cercanía", async ({ pag
 });
 
 test("la flecha de empezar se arrastra, vuelve si se suelta antes y abre el acceso al completar", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/bienvenida");
   const start = page.getByRole("button", { name: "Empezar", exact: true });
   await start.scrollIntoViewIfNeeded();
   const knob = page.getByTestId("start-knob");
@@ -644,7 +651,7 @@ test("la flecha de empezar se arrastra, vuelve si se suelta antes y abre el acce
   await page.mouse.move(initial.x + initial.width / 2 + 65, initial.y + initial.height / 2, { steps: 8 });
   expect((await knob.boundingBox())!.x).toBeGreaterThan(initial.x + 40);
   await page.mouse.up();
-  await expect(page).toHaveURL("http://127.0.0.1:3100/");
+  await expect(page).toHaveURL("http://127.0.0.1:3100/bienvenida");
   await expect.poll(async () => (await knob.boundingBox())!.x).toBeCloseTo(initial.x, 0);
   await page.mouse.move(initial.x + initial.width / 2, initial.y + initial.height / 2);
   await page.mouse.down();
@@ -714,4 +721,77 @@ test("si tampoco se permite copiar, compartir ofrece texto seleccionable", async
   await page.getByRole("button", { name: "Compartir invitación" }).click();
   await expect(page.getByLabel("Texto para compartir")).toHaveValue(/0123456789abcdef/);
   await expect(page.getByLabel("Texto para compartir")).toHaveValue(/http:\/\/127.0.0.1:3100\//);
+});
+
+
+test("un navegador limpio explora y filtra sin crear una sesión", async ({ page, context }) => {
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Sala de prueba/ }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Para bailar", exact: true }).click();
+  await expect(page.getByRole("link", { name: /Jazz de prueba/ })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("link", { name: /Jazz de prueba/ }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Abrir menú" }).click();
+  await expect(page.getByRole("link", { name: "Entrar o crear cuenta" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Salir", exact: true })).toHaveCount(0);
+  expect(guestSignups).toBe(0);
+  expect((await context.cookies()).filter(c => c.name.includes("auth-token"))).toHaveLength(0);
+});
+
+test("el enlace público conserva la ficha cerrada y bloquea prelistas", async ({ page, context }) => {
+  closedPlace = true; emptyPlaces = true;
+  const response = await page.goto(`/local/${testPlaces[0].id}`);
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { name: "Sala de prueba", exact: true })).toBeVisible();
+  await expect(page.getByText("Cerrado en este momento", { exact: false })).toBeVisible();
+  await expect(page.getByText("23:00–06:00 (+1 día)")).toBeVisible();
+  await expect(page.getByText("Las prelistas no están disponibles en este momento.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Apuntarme a la prelista" })).toHaveCount(0);
+  expect(guestSignups).toBe(0);
+  expect((await context.cookies()).filter(c => c.name.includes("auth-token"))).toHaveLength(0);
+});
+
+test("la ficha abierta ofrece acceso con regreso al local y SEO de pruebas", async ({ page }) => {
+  await page.goto(`/local/${testPlaces[0].id}`);
+  await expect(page).toHaveTitle("Sala de prueba · Hunter");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `http://127.0.0.1:3100/local/${testPlaces[0].id}`);
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  await page.getByRole("link", { name: "Entra para apuntarte" }).click();
+  await expect(page).toHaveURL(new RegExp(`/login\\?next=%2Flocal%2F${testPlaces[0].id}`));
+  existingProfile = true;
+  await requestLink(page, `/local/${testPlaces[0].id}`);
+  await page.goto(`${callback}&code=valid`);
+  await expect(page).toHaveURL(`http://127.0.0.1:3100/local/${testPlaces[0].id}`);
+  await expect(page.getByRole("button", { name: "Apuntarme a la prelista" })).toBeVisible();
+});
+
+test("identificadores inexistentes devuelven 404 y la demo no se indexa", async ({ page, request }) => {
+  for (const id of ["no-es-un-local", "30000000-0000-0000-0000-000000000099"]) {
+    const response = await request.get(`/local/${id}`);
+    expect(response.status()).toBe(404);
+  }
+  await page.goto("/local/d0000000-0000-4000-8000-000000000001");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+  const robots = await request.get("/robots.txt");
+  expect(await robots.text()).toContain("Disallow: /");
+  expect(await (await request.get("/sitemap.xml")).text()).not.toContain("/local/");
+});
+
+test("un fallo de catálogo no se disfraza de ficha inexistente", async ({ page }) => {
+  publicPlaceError = true;
+  await page.goto(`/local/${testPlaces[0].id}`);
+  await expect(page.getByRole("heading", { name: "No hemos podido cargar esta ficha" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Volver a intentar" })).toBeVisible();
+});
+
+test("el catálogo público cabe en escritorio y mantiene las cabeceras", async ({ page, request }) => {
+  await page.setViewportSize({ width: 1365, height: 900 });
+  await page.goto("/");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: test.info().outputPath("public-desktop.png"), fullPage: true });
+  const response = await request.get("/login");
+  expect(response.headers()["x-frame-options"]).toBe("DENY");
+  expect(response.headers()["x-content-type-options"]).toBe("nosniff");
+  expect(response.headers()["x-robots-tag"]).toContain("noindex");
 });

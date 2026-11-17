@@ -86,6 +86,9 @@ export function LoginForm({ next, initialError = null }: { next: string; initial
       <header className="flex flex-col gap-2">
         <HunterLogo className="h-8 text-fg" />
         <p className="eyebrow mt-8 text-lime">Tu noche empieza aquí</p><h1 className="text-[42px] leading-none font-black tracking-tight">Entra en Hunter</h1>
+        {next.startsWith("/local/") && <p className="text-sm text-lime">Entra para guardar este plan y acceder a sus ofertas. Después volverás a la ficha.</p>}
+        {next === "/compras" && <p className="text-sm text-lime">Entra para generar tu QR de compra y consultar tus puntos.</p>}
+        {next === "/planes" && <p className="text-sm text-lime">Entra para guardar tus planes y tenerlos a mano durante la noche.</p>}
         <p className="text-muted">Sin contraseñas: te enviamos un enlace para entrar.</p>
       </header>
       {step.name === "email" ? (

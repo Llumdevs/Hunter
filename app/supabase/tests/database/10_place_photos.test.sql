@@ -18,6 +18,7 @@ select lives_ok($$ insert into public.place_photos (place_id, storage_path, righ
 select throws_ok($$ insert into public.place_photos (place_id, storage_path, rights_confirmed)
   values ('30000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001/foto-2.jpg', false) $$,
   '23514', null, 'sin confirmar derechos no se registra');
+reset role;
 select is((select uploaded_by from public.place_photos limit 1), '00000000-0000-0000-0000-00000000000d'::uuid,
   'queda constancia de quién la subió');
 reset role;

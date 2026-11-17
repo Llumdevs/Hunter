@@ -6,14 +6,16 @@ import { useState } from "react";
 import { ErrorText, LinkButton, PrimaryButton } from "@/components/ui";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
-type Props = { placeId: string; signedUp: boolean; loggedIn: boolean; price: string };
+type Props = { placeId: string; signedUp: boolean; loggedIn: boolean; price: string; available?: boolean };
 
 const FLOATING = "fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-md booking-bar px-6 pt-4 pb-6";
 
-export function SignupButton({ placeId, signedUp, loggedIn, price }: Props) {
+export function SignupButton({ placeId, signedUp, loggedIn, price, available = true }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+
+  if (!available && !signedUp) return <div className={FLOATING}><p className="text-center text-sm text-muted">Las prelistas no están disponibles en este momento.</p></div>;
 
   if (!loggedIn) {
     return <div className={FLOATING}><LinkButton href={`/login?next=${encodeURIComponent(`/local/${placeId}`)}`}>Entra para apuntarte</LinkButton></div>;

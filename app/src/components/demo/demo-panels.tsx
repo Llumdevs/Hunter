@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LinkButton } from "@/components/ui";
 import { useDemo } from "./provider";
 import { DEMO_EVENTS, DEMO_PLACES } from "@/lib/demo/catalog";
 import { tonightDate } from "@/lib/tonight/night";
@@ -23,7 +24,7 @@ export function DemoEvents({ placeIds, hideHeading = false, ranked, me = null }:
   const month = new Intl.DateTimeFormat("es-ES", { month: "short", timeZone: "Europe/Madrid" }).format(now).replace(".", "");
   const events = ranked ? ranked.flatMap((item) => DEMO_EVENTS.filter((event) => event.placeId === item.place.id)) : DEMO_EVENTS.filter((event) => !placeIds || placeIds.includes(event.placeId));
   if (!events.length) return null;
-  return <section aria-label="Eventos simulados" className="flex flex-col gap-4">
+  return <section aria-label="Eventos simulados" className="demo-discovery-feed flex flex-col gap-4">
     {!hideHeading && <div className="flex items-baseline justify-between gap-3"><h2 className="text-lg font-extrabold">En el radar</h2><span className="text-[10px] font-semibold text-violet-soft">Esta noche · Demo</span></div>}
     {events.map((event, index) => {
       const item = ranked?.find((item) => item.place.id === event.placeId);
@@ -32,9 +33,10 @@ export function DemoEvents({ placeIds, hideHeading = false, ranked, me = null }:
   </section>;
 }
 
-export function DemoSignup({ placeId, price }: { placeId: string; price?: string }) {
+export function DemoSignup({ placeId, price, loggedIn = false }: { placeId: string; price?: string; loggedIn?: boolean }) {
   const { state, update, ready } = useDemo();
   const selected = state.plans.some((plan) => plan.placeId === placeId);
+  if (!loggedIn) return <div className="booking-bar fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-md p-5"><LinkButton href={`/login?next=${encodeURIComponent(`/local/${placeId}`)}`}>Entra para guardar este plan demo</LinkButton></div>;
   return <div className="booking-bar fixed inset-x-0 bottom-0 z-10 mx-auto flex w-full max-w-md items-center gap-5 px-6 pt-4 pb-6">
     <div className="flex-none"><p className="text-[10px] text-muted">Presupuesto</p><b className="text-2xl">{price ?? "—"}</b></div>
     {selected ? <Link href="/planes" className="flex min-h-14 flex-1 items-center justify-center rounded-full bg-violet px-4 text-xs font-bold text-night-950">✓ Plan demo guardado · ver Mis planes</Link>
