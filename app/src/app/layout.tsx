@@ -1,10 +1,14 @@
 import "@fontsource-variable/plus-jakarta-sans";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { publicEnv } from "@/lib/env";
+import { indexingEnabled } from "@/lib/public/seo";
 import "leaflet/dist/leaflet.css";
 import { DemoProvider } from "@/components/demo/provider";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(publicEnv.appOrigin),
+  robots: { index: indexingEnabled, follow: indexingEnabled },
   title: "Hunter",
   description: "Sabe dónde vas antes de ir.",
   applicationName: "Hunter",

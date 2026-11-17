@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { publicEnv } from "@/lib/env";
 
 // Refresca la sesión de Supabase en cada petición y propaga las cookies actualizadas.
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
   const supabase = createServerClient(publicEnv.supabaseUrl, publicEnv.supabaseKey, {
     cookies: {

@@ -119,3 +119,9 @@
   .search-line:focus-within { border-color: #a99aff99; }
   .venue-poster { min-height: 290px; }
 }
+
+@media (min-width: 900px) {
+  body > main:has(.public-discovery), body > main:has(.public-place) { max-width: 1024px; }
+  .public-discovery .demo-discovery-feed { display: grid; grid-template-columns: 1.2fr 1fr; }
+  .public-discovery .demo-discovery-feed > .event-poster:first-child { grid-row: span 3; height: 100%; min-height: 350px; }
+}

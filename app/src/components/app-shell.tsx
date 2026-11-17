@@ -9,5 +9,5 @@ export async function AppShell({ children }: { children: ReactNode }) {
   const userId = claims?.claims.sub;
   const membership = userId ? await supabase.from("organizer_members").select("organizer_id").eq("user_id", userId).limit(1) : null;
   const canManageVenue = !membership?.error && (membership?.data?.length ?? 0) > 0;
-  return <><SideMenu canManageVenue={canManageVenue} />{children}<TabBar /></>;
+  return <><SideMenu canManageVenue={canManageVenue} signedIn={Boolean(userId)} />{children}<TabBar /></>;
 }

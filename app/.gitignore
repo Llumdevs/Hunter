@@ -52,3 +52,10 @@ reports
 # Estado local de Supabase; puede contener credenciales de contenedores.
 /supabase/.temp/
 /supabase/.branches/
+
+# Cloudflare build and local runtime variables
+/.open-next/
+/.wrangler/
+.dev.vars*
+worker-configuration.d.ts
+!.dev.vars.example

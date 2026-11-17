@@ -17,7 +17,7 @@ const LINKS = [
   { href: "/privacidad", label: "Privacidad", Icon: ShieldCheck },
 ];
 
-export function SideMenu({ canManageVenue = false }: { canManageVenue?: boolean }) {
+export function SideMenu({ canManageVenue = false, signedIn = false }: { canManageVenue?: boolean; signedIn?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const previousOverflow = useRef("");
@@ -58,13 +58,13 @@ export function SideMenu({ canManageVenue = false }: { canManageVenue?: boolean 
       <div className="flex h-full flex-col gap-6 overflow-y-auto p-6">
         <div className="flex items-center justify-between"><h2 id="side-menu-title" className="text-xl font-extrabold">Tu Hunter</h2><button type="button" onClick={close} aria-label="Cerrar menú" className="grid h-11 w-11 place-items-center rounded-full border border-white/15"><X aria-hidden className="h-5 w-5" /></button></div>
         <nav aria-label="Opciones de cuenta" className="flex flex-col gap-2">
-          {LINKS.filter((link) => link.href !== "/panel" || canManageVenue).map(({ href, label, Icon }) => <Link key={href} href={href} onClick={close} className="glass flex min-h-14 items-center gap-3 rounded-2xl px-4"><Icon aria-hidden className="h-5 w-5 text-violet-soft" />{label}</Link>)}
+          {(signedIn ? LINKS : [{ href: "/login?next=%2F", label: "Entrar o crear cuenta", Icon: User }, { href: "/bienvenida", label: "Cómo funciona Hunter", Icon: FlaskConical }, { href: "/locales", label: "Hunter para locales", Icon: Store }, { href: "/privacidad", label: "Privacidad", Icon: ShieldCheck }]).filter((link) => link.href !== "/panel" || canManageVenue).map(({ href, label, Icon }) => <Link key={href} href={href} onClick={close} className="glass flex min-h-14 items-center gap-3 rounded-2xl px-4"><Icon aria-hidden className="h-5 w-5 text-violet-soft" />{label}</Link>)}
         </nav>
-        <div className="mt-auto flex flex-col gap-3 border-t border-white/15 pt-5">
+        {signedIn && <div className="mt-auto flex flex-col gap-3 border-t border-white/15 pt-5">
           <p className="text-xs text-muted">Si estás probando como invitado, cerrar sesión te hará perder el acceso a esa cuenta.</p>
           <button type="button" disabled={busy} onClick={logOut} className="flex min-h-12 items-center gap-3 font-semibold text-violet-soft"><LogOut aria-hidden className="h-5 w-5" />{busy ? "Saliendo…" : "Salir"}</button>
           {error && <p role="alert" className="text-sm text-rose">{error}</p>}
-        </div>
+        </div>}
       </div>
     </dialog>
   </>;

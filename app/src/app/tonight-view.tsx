@@ -13,7 +13,7 @@ import { MUSIC, VIBES, PRICES, labelFor } from "@/lib/tonight/catalog";
 import { DEMO_EVENTS } from "@/lib/demo/catalog";
 import { DemoBanner, DemoEvents } from "@/components/demo/demo-panels";
 
-type Props = TonightData & { displayName: string };
+type Props = TonightData & { displayName: string | null };
 
 export function TonightView({ places, weights, preferences, displayName, demoMode, loadError }: Props) {
   const { position, denied } = useMyPosition();
@@ -35,7 +35,8 @@ export function TonightView({ places, weights, preferences, displayName, demoMod
   }));
 
   return (
-    <section aria-label={`Planes para ${displayName}`} className="flex flex-col gap-4">
+    <section aria-label={displayName ? `Planes para ${displayName}` : "Planes de esta noche"} className="public-discovery flex flex-col gap-4">
+      {!displayName && <div className="rounded-3xl border border-violet/20 bg-violet/10 p-4"><h2 className="text-lg font-extrabold">Sabe dónde vas antes de ir.</h2><p className="mt-2 text-xs leading-relaxed text-muted">Explora Valencia sin cuenta. Entra cuando quieras guardar un plan o personalizar tus gustos.</p><div className="mt-3 flex gap-4 text-xs font-semibold"><Link href="/bienvenida" className="min-h-11 content-center text-violet-soft">Cómo funciona</Link><Link href="/login?next=%2F" className="min-h-11 content-center text-lime">Entrar para guardar planes</Link></div></div>}
       <label className="search-line flex h-12 items-center gap-3 border-b border-white/10 px-1"><Search aria-hidden className="h-4 w-4 flex-none text-muted" /><input type="search" aria-label="Buscar un evento o local" placeholder="Busca un evento, local o barrio" value={query} onChange={(e) => setQuery(e.target.value)} className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-muted/70" /></label>
       <div aria-label="Explorar por ambiente" className="horizontal-carousel -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">{[{ label: "Todo", vibe: "", Icon: AudioLines }, { label: "Para bailar", vibe: "bailar", Icon: Disc3 }, { label: "En directo", vibe: "directo", Icon: Mic2 }, { label: "Para hablar", vibe: "hablar", Icon: MessageCircle }].map(({ label, vibe, Icon }) => <button key={label} type="button" aria-pressed={filters.vibe === vibe} onClick={() => setFilters({ ...filters, vibe })} className={`flex min-h-11 flex-none items-center gap-2 rounded-xl px-3 text-xs font-semibold ${filters.vibe === vibe ? "bg-white/15 text-white" : "bg-white/[.04] text-muted"}`}><Icon aria-hidden className={`h-4 w-4 ${filters.vibe === vibe ? "text-violet" : ""}`} />{label}</button>)}</div>
       <header className="flex items-center justify-between gap-3"><div><h1 className="text-2xl font-extrabold">Esta noche</h1><p className="mt-1 text-xs text-muted">Un plan que encaje contigo.</p></div><button type="button" aria-label="Filtrar esta noche" aria-expanded={filtersOpen} aria-controls="tonight-filters" onClick={() => setFiltersOpen(!filtersOpen)} className={`relative grid h-11 w-11 place-items-center rounded-full ${filtersOpen || Object.values(filters).some(Boolean) ? "bg-violet/15 text-violet-soft" : "bg-white/5"}`}><SlidersHorizontal aria-hidden className="h-4 w-4" /></button></header>
