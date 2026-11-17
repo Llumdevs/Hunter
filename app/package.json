@@ -22,7 +22,11 @@
     "test:mutation": "stryker run",
     "test:e2e": "playwright test",
     "db:grant-staff": "scripts/grant-place-access.sh",
-    "db:mutation": "python3 scripts/db-mutation.py"
+    "db:mutation": "python3 scripts/db-mutation.py",
+    "cf:build": "node scripts/cloudflare.mjs build",
+    "cf:preview": "node scripts/cloudflare.mjs preview",
+    "cf:deploy": "node scripts/cloudflare.mjs deploy",
+    "cf:typegen": "wrangler types"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
@@ -39,6 +43,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "1.20.17",
     "@playwright/test": "^1.65.0",
     "@stryker-mutator/core": "^10.1.1",
     "@stryker-mutator/vitest-runner": "^10.1.1",
@@ -51,9 +56,11 @@
     "@vitest/coverage-v8": "^5.1.0",
     "eslint": "^9",
     "eslint-config-next": "^16.4.5",
+    "rclone.js": "0.6.6",
     "supabase": "^2.40.7",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "wrangler": "4.164.0"
   }
 }
