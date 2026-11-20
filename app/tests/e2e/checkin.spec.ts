@@ -71,7 +71,7 @@ test.describe("accesos no válidos", () => {
     await page.goto(DEMO_QR);
     await logIn(page, uniqueEmail());
     await createProfile(page, "2012-05-05");
-    await expect(page.locator("main").getByRole("alert")).toHaveText("Hunter es solo para mayores de 18 años.");
+    await expect(page.locator("main").getByRole("alert")).toHaveText("Spotea es solo para mayores de 18 años.");
     await expect(page).toHaveURL(/\/perfil\/nuevo/);
   });
 
@@ -87,7 +87,7 @@ test.describe("accesos no válidos", () => {
     await expect(page.getByRole("heading", { name: "QR no válido" })).toBeVisible();
   });
 
-  test("el login no redirige fuera de Hunter", async ({ page }) => {
+  test("el login no redirige fuera de Spotea", async ({ page }) => {
     await page.goto("/login?next=https://evil.example");
     await logIn(page, uniqueEmail());
     await createProfile(page, "2000-01-01");

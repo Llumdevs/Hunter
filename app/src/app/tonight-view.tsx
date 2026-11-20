@@ -58,7 +58,7 @@ export function TonightView({ places, weights, preferences, displayName, demoMod
       </div>}
       {demoMode && <DemoEvents hideHeading ranked={rankedDemo} me={position} />}
       {visiblePlaces.length === 0 ? (
-        <p className="glass rounded-[var(--radius-card)] p-5 text-muted">{places.length === 0 ? "Esta noche no hay locales abiertos en Hunter todavía." : "No hay locales que coincidan con estos filtros. Prueba a quitar alguno."}</p>
+        <p className="glass rounded-[var(--radius-card)] p-5 text-muted">{places.length === 0 ? "Esta noche no hay locales abiertos en Spotea todavía." : "No hay locales que coincidan con estos filtros. Prueba a quitar alguno."}</p>
       ) : (
         <>
           {!hasPreferences && (

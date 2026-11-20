@@ -36,7 +36,7 @@ export default async function PlansPage() {
               </div>
               <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-3">
                 <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([signup.places?.address || signup.places?.name, signup.places?.zone, signup.places?.cities?.name || "Valencia"].filter(Boolean).join(", "))}`} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/15 text-xs font-semibold text-violet-soft"><MapPin aria-hidden className="h-4 w-4" />Cómo llegar</a>
-                <ShareButton title={signup.places?.name || "Plan en Hunter"} text="¿Te apuntas? Descubre este local en Hunter." path={`/local/${signup.place_id}`} label="Compartir plan" />
+                <ShareButton title={signup.places?.name || "Plan en Spotea"} text="¿Te apuntas? Descubre este local en Spotea." path={`/local/${signup.place_id}`} label="Compartir plan" />
               </div>
               {redemption ? (
                 <Link href={`/canje/${redemption.id}`} className="flex items-center gap-2 font-bold text-lime">

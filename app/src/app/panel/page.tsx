@@ -20,7 +20,7 @@ export default async function PanelHomePage() {
   const applications = applicationSchema.array().safeParse(applicationResult.data ?? []);
 
   return <section className="flex flex-col gap-5">
-    <header><p className="text-sm font-bold tracking-widest text-violet uppercase">Hunter para locales</p><h1 className="text-3xl font-extrabold">Tu espacio de gestión</h1></header>
+    <header><p className="text-sm font-bold tracking-widest text-violet uppercase">Spotea para locales</p><h1 className="text-3xl font-extrabold">Tu espacio de gestión</h1></header>
     {(membershipResult.error || placesError) && <p role="alert" className="text-sm text-rose">No hemos podido cargar tus locales. Vuelve a intentarlo.</p>}
     {(places ?? []).map((place) => <Link key={place.id} href={`/panel/${place.id}`} className="flex items-center gap-4 rounded-[var(--radius-card)] bg-day-card p-4 shadow-sm">
       <span className="grid h-12 w-12 place-items-center rounded-2xl bg-tile-sand"><Store aria-hidden className="h-6 w-6" /></span>

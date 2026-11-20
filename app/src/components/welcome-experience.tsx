@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ScanLine } from "lucide-react";
 import { useState } from "react";
 import { SlideToStart } from "./slide-to-start";
-import { HunterLogo } from "./logo";
+import { SpoteaLogo } from "./logo";
 
 const STEPS = [
   { image: "night", title: "Encuentra tu frecuencia", detail: "Descubre la música y el ambiente antes de salir." },
@@ -17,10 +17,10 @@ export function WelcomeExperience() {
   const [step, setStep] = useState(0);
   const selected = STEPS[step];
   return <section className="welcome-editorial -mx-5 -my-6 flex min-h-dvh flex-col px-7 pt-7 pb-7">
-    <header className="flex items-center justify-between"><HunterLogo className="h-6" /><span className="text-[10px] font-bold tracking-widest text-muted">VALENCIA / +18</span></header>
+    <header className="flex items-center justify-between"><SpoteaLogo className="h-6" /><span className="text-[10px] font-bold tracking-widest text-muted">VALENCIA / +18</span></header>
     <h1 className="mt-7 text-[clamp(42px,12vw,54px)] leading-[1.04] font-extrabold tracking-[-.045em]">¿Listo para<br />esta <span className="outline-type">noche?</span></h1>
     <div className="relative mt-6 flex min-h-64 flex-1 items-center gap-6 py-2">
-      <div role="tablist" aria-label="Descubre Hunter" aria-orientation="vertical" onKeyDown={(event) => { const keys = ["ArrowDown", "ArrowUp", "Home", "End"]; if (!keys.includes(event.key)) return; event.preventDefault(); const next = event.key === "Home" ? 0 : event.key === "End" ? STEPS.length - 1 : (step + (event.key === "ArrowDown" ? 1 : -1) + STEPS.length) % STEPS.length; setStep(next); document.getElementById(`intro-tab-${next}`)?.focus(); }} className="flex flex-col items-center gap-3">
+      <div role="tablist" aria-label="Descubre Spotea" aria-orientation="vertical" onKeyDown={(event) => { const keys = ["ArrowDown", "ArrowUp", "Home", "End"]; if (!keys.includes(event.key)) return; event.preventDefault(); const next = event.key === "Home" ? 0 : event.key === "End" ? STEPS.length - 1 : (step + (event.key === "ArrowDown" ? 1 : -1) + STEPS.length) % STEPS.length; setStep(next); document.getElementById(`intro-tab-${next}`)?.focus(); }} className="flex flex-col items-center gap-3">
         {STEPS.map((item, index) => <div key={item.title} className="flex flex-col items-center gap-3"><button type="button" role="tab" tabIndex={step === index ? 0 : -1} id={`intro-tab-${index}`} aria-controls="intro-panel" aria-selected={step === index} aria-label={`${index + 1}. ${item.title}`} onClick={() => setStep(index)} className={`grid h-9 w-9 place-items-center rounded-full border text-sm ${step === index ? "border-white text-white" : "border-white/10 text-muted/40"}`}>{index + 1}</button>{index < 2 && <span aria-hidden className="h-4 w-px bg-white/15" />}</div>)}
       </div>
       <div className="intro-capsule relative mx-auto w-full max-w-48 overflow-hidden rounded-[130px]">

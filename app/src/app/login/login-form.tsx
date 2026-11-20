@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { HunterLogo } from "@/components/logo";
+import { SpoteaLogo } from "@/components/logo";
 import { ErrorText, Field, INPUT_CLASS, PrimaryButton } from "@/components/ui";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { loginErrorMessage } from "@/lib/auth/login-errors";
@@ -84,8 +84,8 @@ export function LoginForm({ next, initialError = null }: { next: string; initial
   return (
     <section className="login-stage flex flex-1 flex-col justify-center gap-8 py-8">
       <header className="flex flex-col gap-2">
-        <HunterLogo className="h-8 text-fg" />
-        <p className="eyebrow mt-8 text-lime">Tu noche empieza aquí</p><h1 className="text-[42px] leading-none font-black tracking-tight">Entra en Hunter</h1>
+        <SpoteaLogo className="h-8 text-fg" />
+        <p className="eyebrow mt-8 text-lime">Tu noche empieza aquí</p><h1 className="text-[42px] leading-none font-black tracking-tight">Entra en Spotea</h1>
         {next.startsWith("/local/") && <p className="text-sm text-lime">Entra para guardar este plan y acceder a sus ofertas. Después volverás a la ficha.</p>}
         {next === "/compras" && <p className="text-sm text-lime">Entra para generar tu QR de compra y consultar tus puntos.</p>}
         {next === "/planes" && <p className="text-sm text-lime">Entra para guardar tus planes y tenerlos a mano durante la noche.</p>}
@@ -125,7 +125,7 @@ export function LoginForm({ next, initialError = null }: { next: string; initial
           className="glass min-h-12 rounded-full px-5 py-3 font-bold disabled:opacity-50">
           Probar sin correo
         </button>
-        <p className="text-xs text-muted">Acceso de invitado para probar Hunter. La sesión queda en este navegador: si cierras sesión o borras sus datos, no podrás recuperarla.</p>
+        <p className="text-xs text-muted">Acceso de invitado para probar Spotea. La sesión queda en este navegador: si cierras sesión o borras sus datos, no podrás recuperarla.</p>
       </div>
       {error && <ErrorText>{error}</ErrorText>}
     </section>

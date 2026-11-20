@@ -32,7 +32,7 @@ export default async function CheckInPage({ params, searchParams }: PageProps) {
     .eq("id", placeId)
     .eq("is_active", true)
     .maybeSingle();
-  if (!place) return <Notice title="Local no disponible">Este local no está en Hunter ahora mismo.</Notice>;
+  if (!place) return <Notice title="Local no disponible">Este local no está en Spotea ahora mismo.</Notice>;
 
   const offers: Offer[] = place.offers
     .filter((offer) => offer.is_active)

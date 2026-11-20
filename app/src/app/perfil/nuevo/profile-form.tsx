@@ -11,7 +11,7 @@ const PROFILE_ERROR_MESSAGES: Record<ProfileError, string> = {
   name_required: "Escribe tu nombre.",
   name_too_long: "El nombre puede tener como máximo 60 caracteres.",
   birthdate_invalid: "La fecha de nacimiento no es válida.",
-  underage: "Hunter es solo para mayores de 18 años.",
+  underage: "Spotea es solo para mayores de 18 años.",
 };
 
 export function ProfileForm({ userId, next }: { userId: string; next: string }) {

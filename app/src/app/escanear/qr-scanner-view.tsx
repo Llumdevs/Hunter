@@ -6,7 +6,7 @@ import { ErrorText } from "@/components/ui";
 import { publicEnv } from "@/lib/env";
 import { checkInPath, parseCheckInLink } from "@/lib/checkin/link";
 
-const FOREIGN_QR_MESSAGE = "Ese QR no es de Hunter. Busca el QR de Hunter del local.";
+const FOREIGN_QR_MESSAGE = "Ese QR no es de Spotea. Busca el QR de Spotea del local.";
 const CAMERA_ERROR_MESSAGE = "No podemos usar la cámara. Revisa los permisos o escanea con la cámara del móvil.";
 
 export function QrScannerView() {

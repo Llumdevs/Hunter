@@ -9,9 +9,9 @@ import { DemoProvider } from "@/components/demo/provider";
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.appOrigin),
   robots: { index: indexingEnabled, follow: indexingEnabled },
-  title: "Hunter",
+  title: "Spotea",
   description: "Sabe dónde vas antes de ir.",
-  applicationName: "Hunter",
+  applicationName: "Spotea",
 };
 
 export const viewport: Viewport = {

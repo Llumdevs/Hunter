@@ -27,11 +27,11 @@ export async function generateMetadata({ params }: { params: Promise<{ placeId: 
   const data = await loadPublicPlace(placeId);
   if (!data) notFound();
   const { place, demo } = data;
-  const description = demo ? `${place.name}: demostración ficticia de Hunter en Valencia.` : `${place.name} en ${place.zone}, ${place.city}. Consulta horarios, música, ambiente y disponibilidad en Hunter.`;
+  const description = demo ? `${place.name}: demostración ficticia de Spotea en Valencia.` : `${place.name} en ${place.zone}, ${place.city}. Consulta horarios, música, ambiente y disponibilidad en Spotea.`;
   const url = absoluteUrl(`/local/${place.id}`);
-  return { title: `${place.name} · Hunter`, description,
+  return { title: `${place.name} · Spotea`, description,
     alternates: demo ? undefined : { canonical: url }, robots: { index: indexingEnabled && !demo, follow: !demo },
-    openGraph: { title: `${place.name} · Hunter`, description, url, type: "website", images: !demo && place.cover_path ? [{ url: placePhotoUrl(publicEnv.supabaseUrl,place.cover_path), alt: place.name }] : [] },
+    openGraph: { title: `${place.name} · Spotea`, description, url, type: "website", images: !demo && place.cover_path ? [{ url: placePhotoUrl(publicEnv.supabaseUrl,place.cover_path), alt: place.name }] : [] },
   };
 }
 
@@ -66,8 +66,8 @@ export default async function PlacePage({ params }: { params: Promise<{ placeId:
         <PlacePhoto path={place.cover_path} alt={place.name} eager demo={Boolean(demoPlace)} variant={place.music === "jazz" ? "live" : place.music === "indie" ? "terrace" : place.music === "pop" ? "electric" : "night"} className="absolute inset-0" />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
         <div className="absolute top-6 left-5"><IconLink href="/" label="Volver a Esta noche"><ArrowLeft aria-hidden className="h-5 w-5" /></IconLink></div>
-        <div className="absolute top-6 right-5"><ShareButton compact title={place.name.replace(" · Demo", "")} text={demoPlace ? "Plan de prueba de Hunter · Evento simulado." : `¿Vamos a ${place.name}? Descubre el plan en Hunter.`} path={`/local/${placeId}`} label="Compartir local" /></div>
-        <div className="detail-title absolute right-8 bottom-6 left-0 rounded-r-[48px] px-6 py-5"><p className="mb-2 text-[10px] font-semibold text-white/70">{demoPlace ? "Hunter presenta / Evento demo" : "Descubre el local"}</p><h1 className="max-w-72 text-[34px] leading-[1.05] font-extrabold tracking-tight text-white">{place.name}</h1>{demoPlace && <p className="mt-2 text-sm font-medium text-white/80">{DEMO_EVENTS.find((event) => event.placeId === placeId)?.title}</p>}</div>
+        <div className="absolute top-6 right-5"><ShareButton compact title={place.name.replace(" · Demo", "")} text={demoPlace ? "Plan de prueba de Spotea · Evento simulado." : `¿Vamos a ${place.name}? Descubre el plan en Spotea.`} path={`/local/${placeId}`} label="Compartir local" /></div>
+        <div className="detail-title absolute right-8 bottom-6 left-0 rounded-r-[48px] px-6 py-5"><p className="mb-2 text-[10px] font-semibold text-white/70">{demoPlace ? "Spotea presenta / Evento demo" : "Descubre el local"}</p><h1 className="max-w-72 text-[34px] leading-[1.05] font-extrabold tracking-tight text-white">{place.name}</h1>{demoPlace && <p className="mt-2 text-sm font-medium text-white/80">{DEMO_EVENTS.find((event) => event.placeId === placeId)?.title}</p>}</div>
       </div>
       <div className="relative mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 pt-6 pb-36">
         <div className="flex flex-col gap-3 text-xs text-muted">

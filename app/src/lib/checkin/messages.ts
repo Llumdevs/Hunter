@@ -3,8 +3,8 @@ import type { CheckInError, RedeemError } from "./results";
 // Textos en español. Cuando llegue el inglés, este fichero pasa a ser un diccionario por idioma.
 const CHECK_IN_MESSAGES: Record<CheckInError, string> = {
   rate_limited: "Demasiados intentos seguidos. Espera unos minutos y vuelve a probar.",
-  place_unavailable: "Este local no está disponible en Hunter ahora mismo.",
-  not_adult: "Hunter es solo para mayores de 18 años.",
+  place_unavailable: "Este local no está disponible en Spotea ahora mismo.",
+  not_adult: "Spotea es solo para mayores de 18 años.",
   qr_invalid: "Este QR no es válido. Pide al personal el QR actual del local.",
   invalid_location: "No hemos podido leer bien tu ubicación. Inténtalo de nuevo.",
   too_far: "Parece que no estás en el local. Acércate y vuelve a escanear.",

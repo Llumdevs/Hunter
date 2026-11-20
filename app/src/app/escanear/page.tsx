@@ -9,7 +9,7 @@ export default function ScanPage() {
         <IconLink href="/" label="Volver al inicio"><ArrowLeft aria-hidden className="h-5 w-5" /></IconLink>
         <h1 className="text-2xl font-extrabold uppercase">Escanea el QR</h1>
       </header>
-      <p className="text-muted">Apunta al QR de Hunter que hay en la barra o en la puerta del local.</p>
+      <p className="text-muted">Apunta al QR de Spotea que hay en la barra o en la puerta del local.</p>
       <QrScannerView />
     </section>
   );

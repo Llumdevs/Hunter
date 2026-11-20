@@ -349,7 +349,7 @@ test("la barra tiene cinco accesos y el menú lateral permite abrir perfil y cer
   await expect(navigation.getByRole("link", { name: "Perfil", exact: true })).toHaveCount(0);
   const trigger = page.getByRole("button", { name: "Abrir menú" });
   await trigger.click();
-  await expect(page.getByRole("dialog", { name: "Tu Hunter" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Tu Spotea" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Salir", exact: true })).toBeVisible();
   await page.screenshot({ path: test.info().outputPath("menu-lateral.png") });
   await page.keyboard.press("Escape");
@@ -601,7 +601,7 @@ test("la introducción permite cambiar de paso y continúa al acceso", async ({ 
   await page.locator("img").evaluateAll(async (images) => { await Promise.all(images.map((image) => (image as HTMLImageElement).decode().catch(() => {}))); });
   await page.screenshot({ path: test.info().outputPath("portada-editorial.png"), style: "nextjs-portal { display: none !important; }" });
   await page.getByRole("button", { name: "Empezar", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Entra en Hunter" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Entra en Spotea" })).toBeVisible();
 });
 
 test("la ficha ofrece galería ampliable y conserva la acción de apuntarse", async ({ page }) => {
@@ -657,7 +657,7 @@ test("la flecha de empezar se arrastra, vuelve si se suelta antes y abre el acce
   await page.mouse.down();
   await page.mouse.move(track.x + track.width - 14, initial.y + initial.height / 2, { steps: 12 });
   await page.mouse.up();
-  await expect(page.getByRole("heading", { name: "Entra en Hunter" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Entra en Spotea" })).toBeVisible();
 });
 
 test("el menú normal oculta locales y una cuenta con local conserva el acceso", async ({ page }) => {
@@ -753,7 +753,7 @@ test("el enlace público conserva la ficha cerrada y bloquea prelistas", async (
 
 test("la ficha abierta ofrece acceso con regreso al local y SEO de pruebas", async ({ page }) => {
   await page.goto(`/local/${testPlaces[0].id}`);
-  await expect(page).toHaveTitle("Sala de prueba · Hunter");
+  await expect(page).toHaveTitle("Sala de prueba · Spotea");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `http://127.0.0.1:3100/local/${testPlaces[0].id}`);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   await page.getByRole("link", { name: "Entra para apuntarte" }).click();

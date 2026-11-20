@@ -13,9 +13,9 @@ const discovery = cache(async () => {
 export async function generateMetadata(): Promise<Metadata> {
   const { tonight } = await discovery();
   const index = indexingEnabled && !tonight.demoMode && !tonight.loadError;
-  return { title: 'Mapa de locales en Valencia · Hunter', description: 'Explora locales de Valencia y consulta su música, ubicación y disponibilidad.',
+  return { title: 'Mapa de locales en Valencia · Spotea', description: 'Explora locales de Valencia y consulta su música, ubicación y disponibilidad.',
     alternates: { canonical: absoluteUrl('/mapa') }, robots: { index, follow: index },
-    openGraph: { title: 'Mapa de locales en Valencia · Hunter', description: 'Explora locales de Valencia y consulta su música, ubicación y disponibilidad.', url: absoluteUrl('/mapa'), type: "website" } };
+    openGraph: { title: 'Mapa de locales en Valencia · Spotea', description: 'Explora locales de Valencia y consulta su música, ubicación y disponibilidad.', url: absoluteUrl('/mapa'), type: "website" } };
 }
 
 export default async function MapPage() {

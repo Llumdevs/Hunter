@@ -14,9 +14,9 @@ const discovery = cache(async () => {
 export async function generateMetadata(): Promise<Metadata> {
   const { tonight } = await discovery();
   const index = indexingEnabled && !tonight.demoMode && !tonight.loadError;
-  return { title: 'Esta noche en Valencia · Hunter', description: 'Descubre locales, música y ambiente en Valencia antes de salir.',
+  return { title: 'Esta noche en Valencia · Spotea', description: 'Descubre locales, música y ambiente en Valencia antes de salir.',
     alternates: { canonical: absoluteUrl('/') }, robots: { index, follow: index },
-    openGraph: { title: 'Esta noche en Valencia · Hunter', description: 'Descubre locales, música y ambiente en Valencia antes de salir.', url: absoluteUrl('/'), type: "website" } };
+    openGraph: { title: 'Esta noche en Valencia · Spotea', description: 'Descubre locales, música y ambiente en Valencia antes de salir.', url: absoluteUrl('/'), type: "website" } };
 }
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ code?: string; error?: string; error_code?: string }> }) {
