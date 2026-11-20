@@ -126,7 +126,7 @@ se usó `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium`. La misma suite con
 
 1. Autorizar Cloudflare con `npx wrangler login` en una máquina propia o token
    con alcance mínimo sobre el Worker de pruebas. No pegar el token en el chat.
-2. Revisar nombre `hunter-public-preview` y cuenta de destino. No reutilizar el
+2. Revisar nombre `spotea-piloto` y cuenta de destino. No reutilizar el
    nombre de un Worker existente. No añadir rutas de un dominio de producción.
 3. Obtener el subdominio workers.dev de la cuenta y fijar su URL esperada como
    `NEXT_PUBLIC_APP_ORIGIN`; configurar también las variables runtime. Mantener

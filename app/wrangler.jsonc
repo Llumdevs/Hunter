@@ -1,9 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "hunter-public-preview",
+  "name": "spotea-piloto",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-17",
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
-  "workers_dev": true
+  "workers_dev": true,
+  "vars": { "HUNTER_ENV": "preview", "HUNTER_INDEXING_ENABLED": "false" }
 }
