@@ -300,11 +300,11 @@ test("el mapa permite seleccionar un local, ver su oferta y cerrar la tarjeta", 
   await expect(card).not.toBeVisible();
 });
 
-async function enterPilot(page: Page, destination: string) {
+async function enterPilot(page: Page, destination: string, finalDestination = destination) {
   existingProfile = true;
   await page.goto(`/login?next=${encodeURIComponent(destination)}`);
   await page.getByRole("button", { name: "Probar sin correo" }).click();
-  await expect(page).toHaveURL(`http://127.0.0.1:3100${destination}`);
+  await expect(page).toHaveURL(`http://127.0.0.1:3100${finalDestination}`);
 }
 
 test("el perfil guarda procedencia y feedback con confirmación", async ({ page }) => {
@@ -321,7 +321,7 @@ test("el perfil guarda procedencia y feedback con confirmación", async ({ page 
 });
 
 test("la ruta antigua abre códigos sin solicitudes ni red social", async ({ page }) => {
-  await enterPilot(page, "/amigos");
+  await enterPilot(page, "/amigos", "/invitaciones");
   await expect(page).toHaveURL(/\/invitaciones$/);
   await expect(page.getByRole("heading", { name: "Invita con tu código" })).toBeVisible();
   await page.getByLabel("Código de quien te invitó").fill("abcdef0123456789");
